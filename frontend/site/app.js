@@ -847,11 +847,19 @@ function note_form(id)
 function notes_section(r)
 {
 	const notes = newest_first(r.notes || [], "created_at");
+	const form = note_form(r.id);
+	form.classList.add("hidden");
+	const add = h("button", { type: "button", onclick: () => {
+		form.classList.toggle("hidden");
+		if (!form.classList.contains("hidden"))
+			form.querySelector("textarea").focus();
+	} }, "Notiz hinzufügen");
 	return h("section", {},
-		h("h2", {}, "Notizen"),
+		h("div", { class: "section-head" },
+			h("h2", {}, "Notizen"), add),
 		notes.length ? h("ul", { class: "entries" },
 				 notes.map(n => note_item(r.id, n))) : null,
-		note_form(r.id));
+		form);
 }
 
 /* ---- shopping list and sharing ---- */

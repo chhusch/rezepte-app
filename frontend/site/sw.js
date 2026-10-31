@@ -5,7 +5,7 @@
  * Bump CACHE_VERSION whenever a shell file changes.
  */
 
-const CACHE_VERSION = "v5";
+const CACHE_VERSION = "v6";
 const CACHE_NAME = "rezepte-shell-" + CACHE_VERSION;
 
 const SHELL = [
