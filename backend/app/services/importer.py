@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlsplit
 
 import httpx
 
-from app.importer import heuristic, ingredients, jsonld
+from app.importer import heuristic, ingredients, jsonld, microdata
 from app.importer.common import RecipeData
 from app.importer.fetch import SCHEMES, FetchError, fetch_html
 from app.models import NAME_LEN
@@ -29,6 +29,9 @@ def _extract(html: str) -> tuple[RecipeData, str]:
 	data = jsonld.extract(html)
 	if data is not None and data.is_usable():
 		return data, "jsonld"
+	data = microdata.extract(html)
+	if data is not None and data.is_usable():
+		return data, "microdata"
 	return heuristic.extract(html), "heuristic"
 
 

@@ -14,6 +14,7 @@ import {
 
 const METHOD_LABEL = {
 	jsonld: "schema.org",
+	microdata: "schema.org",
 	heuristic: "Geraten",
 	ocr: "Texterkennung",
 };

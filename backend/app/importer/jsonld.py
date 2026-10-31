@@ -178,7 +178,7 @@ def _nutrition(value, data: RecipeData) -> None:
 		setattr(data, attr, _nutrient(value.get(key)))
 
 
-def _map(node: dict) -> RecipeData:
+def map_recipe(node: dict) -> RecipeData:
 	data = RecipeData()
 	data.title = clean_text(node.get("name"))
 	data.intro = clean_text(node.get("description"))
@@ -211,4 +211,4 @@ def extract(html: str) -> RecipeData | None:
 		return None
 	node = next((r for r in recipes if r.get("recipeIngredient")
 		     or r.get("recipeInstructions")), recipes[0])
-	return _map(node)
+	return map_recipe(node)

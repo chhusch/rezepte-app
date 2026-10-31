@@ -320,7 +320,7 @@ class ImportPreview(BaseModel):
 	source: Source
 	version: ImportVersion
 	image_url: str | None
-	method: Literal["jsonld", "heuristic", "ocr"]
+	method: Literal["jsonld", "microdata", "heuristic", "ocr"]
 	warnings: list[str]
 
 
