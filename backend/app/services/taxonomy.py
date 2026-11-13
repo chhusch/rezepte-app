@@ -1,9 +1,17 @@
-"""Categories and tags: list and create, names unique ignoring case."""
+"""Categories and tags, names unique ignoring case.
 
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+Categories can also be renamed and deleted; recipes of a deleted
+category keep existing without one.
+"""
 
-from app.models import Category, Tag
+from sqlalchemy import func, select, update
+from sqlalchemy.orm import Session, aliased
+
+from app.models import Category, Recipe, RecipeVersion, Tag, VersionKind
+
+
+class NameTaken(Exception):
+	pass
 
 
 def clean_name(name: str) -> str:
@@ -33,6 +41,57 @@ def create_category(db: Session, name: str) -> Category:
 	db.commit()
 	db.refresh(cat)
 	return cat
+
+
+def list_categories_counted(db: Session) -> list[dict]:
+	"""Categories with the number of recipes using each."""
+	n = func.count(Recipe.id)
+	stmt = (select(Category, n)
+		.outerjoin(Recipe, Recipe.category_id == Category.id)
+		.group_by(Category.id)
+		.order_by(Category.name))
+	return [{"id": c.id, "name": c.name, "recipe_count": cnt}
+		for c, cnt in db.execute(stmt)]
+
+
+def rename_category(db: Session, cat_id: int,
+		    name: str) -> Category | None:
+	cat = db.get(Category, cat_id)
+	if cat is None:
+		return None
+	name = clean_name(name)
+	other = find_by_name(db, Category, name)
+	if other is not None and other.id != cat.id:
+		raise NameTaken(name)
+	cat.name = name
+	db.commit()
+	db.refresh(cat)
+	return cat
+
+
+def category_recipes(db: Session, cat_id: int) -> list[dict] | None:
+	"""Id and own title of every recipe in the category."""
+	if db.get(Category, cat_id) is None:
+		return None
+	own = aliased(RecipeVersion)
+	stmt = (select(Recipe.id, own.title)
+		.join(own, (own.recipe_id == Recipe.id)
+		      & (own.kind == VersionKind.OWN))
+		.where(Recipe.category_id == cat_id)
+		.order_by(func.lower(own.title), Recipe.id))
+	return [{"id": i, "title": t} for i, t in db.execute(stmt)]
+
+
+def delete_category(db: Session, cat_id: int) -> bool:
+	cat = db.get(Category, cat_id)
+	if cat is None:
+		return False
+	db.execute(update(Recipe).where(Recipe.category_id == cat_id)
+		   .values(category_id=None))
+	db.delete(cat)
+	db.commit()
+	db.expire_all()
+	return True
 
 
 def list_tags(db: Session) -> list[Tag]:

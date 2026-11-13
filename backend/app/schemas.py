@@ -169,6 +169,15 @@ class CategoryOut(BaseModel):
 	name: str
 
 
+class CategoryCount(CategoryOut):
+	recipe_count: int
+
+
+class CategoryRecipe(BaseModel):
+	id: int
+	title: str
+
+
 class TagIn(BaseModel):
 	name: str = Field(min_length=1, max_length=NAME_LEN)
 

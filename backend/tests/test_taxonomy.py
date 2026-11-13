@@ -58,12 +58,15 @@ def test_list_is_sorted_by_name(auth_client, path):
 					    "Hauptgang", "Suppen"]
 
 
-@pytest.mark.parametrize("path", [CATEGORIES, TAGS])
-def test_list_item_shape(auth_client, path):
+@pytest.mark.parametrize("path, keys", [
+	(CATEGORIES, {"id", "name", "recipe_count"}),
+	(TAGS, {"id", "name"}),
+])
+def test_list_item_shape(auth_client, path, keys):
 	post_name(auth_client, path, "Vegi")
 	rows = auth_client.get(path).json()
 	assert len(rows) == 1
-	assert set(rows[0]) == {"id", "name"}
+	assert set(rows[0]) == keys
 	assert isinstance(rows[0]["id"], int)
 
 
