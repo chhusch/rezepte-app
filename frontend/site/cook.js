@@ -9,6 +9,7 @@
  */
 
 import * as API from "./api.js";
+import { home_link } from "./form.js";
 import {
 	can_scale, scaled_ingredients, servings_stepper, load_servings,
 	parse_timers, format_countdown,
@@ -383,7 +384,7 @@ export async function view_cook(id, ui)
 	};
 
 	return h("div", { class: "cook" },
-		h("header", { class: "topbar" },
+		h("header", { class: "topbar" }, home_link(),
 			h("h1", {}, v.title),
 			h("button", { type: "button", class: "btn-primary",
 				      onclick: finish }, "Fertig")),

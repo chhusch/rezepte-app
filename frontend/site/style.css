@@ -4,16 +4,27 @@
  */
 
 :root {
-	--bg: #f6f1e7;
-	--bg-card: #fffdf8;
-	--fg: #1c1a17;
-	--fg-muted: #6b655c;
-	--line: #ddd5c6;
-	--accent: #c2410c;
+	--bg: #e8d6cb;
+	--bg-card: #f6eee9;
+	--fg: #321b0c;
+	--fg-muted: #6e4f3f;
+	--line: #d4bfb2;
+	--accent: #e2116b;
 	--accent-fg: #ffffff;
-	--danger: #b42318;
-	--star: #d97706;
-	--shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	--link: #321b0c;
+	--icon: #321b0c;
+	--fav: #e2116b;
+	--star: #321b0c;
+	--cat-bg: #f2e2b3;
+	--cat-fg: #321b0c;
+	--chip-on-bg: #321b0c;
+	--chip-on-fg: #f6eee9;
+	--cat-pad: 0 8px;
+	--ok: #325d46;
+	--ok-fg: #ffffff;
+	--danger: #9a3412;
+	--danger-fg: #ffffff;
+	--shadow: 0 1px 3px rgba(50, 27, 12, 0.08);
 	--radius: 12px;
 	--touch: 48px;
 	--gap: 12px;
@@ -23,15 +34,23 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--bg: #1c1a17;
-		--bg-card: #2a2622;
-		--fg: #f1ece2;
-		--fg-muted: #a39b8e;
-		--line: #3d3731;
-		--accent: #f97316;
-		--accent-fg: #1c1a17;
-		--danger: #f87171;
-		--star: #fbbf24;
+		--bg: #321b0c;
+		--bg-card: #43271a;
+		--fg: #e8d6cb;
+		--fg-muted: #bfa392;
+		--line: #5e3e2a;
+		--link: #e8d6cb;
+		--icon: #e8d6cb;
+		--star: #e1ad01;
+		--cat-bg: transparent;
+		--cat-fg: #e1ad01;
+		--cat-pad: 0;
+		--chip-on-bg: #e8d6cb;
+		--chip-on-fg: #321b0c;
+		--ok: #8cc4b2;
+		--ok-fg: #321b0c;
+		--danger: #f2a08a;
+		--danger-fg: #321b0c;
 		--shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 	}
 }
@@ -55,7 +74,7 @@ body {
 }
 
 a {
-	color: var(--accent);
+	color: var(--link);
 	word-break: break-word;
 }
 
@@ -90,17 +109,56 @@ p {
 	z-index: 10;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 6px;
 	min-height: calc(var(--touch) + 12px + env(safe-area-inset-top));
 	padding: calc(6px + env(safe-area-inset-top)) var(--gap) 6px;
 	background: var(--bg);
 	border-bottom: 1px solid var(--line);
 }
 
+.home {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: var(--touch);
+	height: var(--touch);
+	margin-left: -8px;
+	color: var(--icon);
+}
+
+.home svg {
+	width: 36px;
+	height: 36px;
+}
+
+.home:active svg {
+	animation: wobble 0.5s ease-in-out;
+}
+
+@keyframes wobble {
+	25% { transform: rotate(-12deg); }
+	50% { transform: rotate(10deg); }
+	75% { transform: rotate(-5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.home:active svg {
+		animation: none;
+	}
+}
+
+.topbar .btn, .topbar button {
+	padding: 0 12px;
+}
+
+.topbar .btn-icon {
+	padding: 0;
+}
+
 .topbar h1 {
 	flex: 1;
 	margin: 0;
-	font-size: 1.25rem;
+	font-size: 1.2rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -156,7 +214,8 @@ button:active {
 .btn-link {
 	border: none;
 	background: none;
-	color: var(--accent);
+	color: var(--link);
+	text-decoration: underline;
 	padding: 0 8px;
 }
 
@@ -325,12 +384,23 @@ fieldset {
 	padding: 0 14px;
 	border-radius: 20px;
 	font-size: 0.95rem;
+	background: none;
+	color: var(--fg-muted);
 }
 
 .chip[aria-pressed="true"] {
-	background: var(--accent);
-	border-color: var(--accent);
-	color: var(--accent-fg);
+	background: var(--chip-on-bg);
+	border-color: var(--chip-on-bg);
+	color: var(--chip-on-fg);
+}
+
+.cat {
+	display: inline-block;
+	padding: var(--cat-pad);
+	border-radius: 10px;
+	background: var(--cat-bg);
+	color: var(--cat-fg);
+	font-weight: 600;
 }
 
 /* Cards */
@@ -351,7 +421,7 @@ fieldset {
 	text-align: left;
 	padding: 12px 16px;
 	background: var(--bg-card);
-	border: 1px solid var(--line);
+	border: none;
 	border-radius: var(--radius);
 	box-shadow: var(--shadow);
 	color: inherit;
@@ -367,7 +437,7 @@ fieldset {
 }
 
 .card .title .star {
-	color: var(--star);
+	color: var(--fav);
 }
 
 .card .meta {
@@ -475,7 +545,7 @@ fieldset {
 }
 
 .steps li::marker {
-	color: var(--accent);
+	color: var(--fg-muted);
 	font-weight: 700;
 }
 
@@ -537,7 +607,7 @@ details.nutrition .row label {
 }
 
 .fav[aria-pressed="true"] {
-	color: var(--star);
+	color: var(--fav);
 }
 
 /* Photos */
@@ -765,7 +835,7 @@ details.nutrition .row label {
 
 .cook .counter {
 	margin: 0 0 8px;
-	color: var(--accent);
+	color: var(--fg-muted);
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 }
@@ -842,11 +912,11 @@ details.nutrition .row label {
 .timer.done {
 	background: var(--danger);
 	border-color: var(--danger);
-	color: #fff;
+	color: var(--danger-fg);
 }
 
 .timer.done .timer-label {
-	color: #fff;
+	color: var(--danger-fg);
 }
 
 .timer.done button {
@@ -1162,15 +1232,15 @@ button[aria-disabled="true"] {
 	max-width: calc(100vw - 2 * var(--gap));
 	padding: 12px 18px;
 	border-radius: var(--radius);
-	background: var(--fg);
-	color: var(--bg);
+	background: var(--ok);
+	color: var(--ok-fg);
 	box-shadow: var(--shadow);
 	z-index: 100;
 }
 
 #toast.error {
 	background: var(--danger);
-	color: #fff;
+	color: var(--danger-fg);
 }
 
 #toast[hidden] {

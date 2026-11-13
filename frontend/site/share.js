@@ -8,7 +8,7 @@
  */
 
 import * as API from "./api.js";
-import { h, topbar, error_msg } from "./form.js";
+import { h, public_topbar, error_msg } from "./form.js";
 
 const FOOTER = "Rezepte";
 /* Servings state key; keeps shared pages apart from own recipes. */
@@ -40,7 +40,7 @@ function error_text(e)
 function error_page(e)
 {
 	return h("div", { class: "shared" },
-		topbar(FOOTER),
+		public_topbar(FOOTER),
 		h("main", {},
 			h("p", { class: "empty" }, error_text(e))));
 }
@@ -50,7 +50,7 @@ function shared_el(token, r, ui)
 	const tags = (r.tags || []).map(t => "#" + t).join(" ");
 	const meta = join_present([r.category, tags], " · ");
 	return h("div", { class: "shared" },
-		topbar(r.title),
+		public_topbar(r.title),
 		h("main", {},
 			h("h1", {}, r.title),
 			meta ? h("p", { class: "meta-line" }, meta) : null,

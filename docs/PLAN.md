@@ -353,3 +353,14 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
 - `DELETE /api/categories/{id}`: 204; Rezepte bleiben, ohne Kategorie.
 - Ansicht `#/categories` (`categories.js`), im Menü der Liste.
   Löschen einer verwendeten Kategorie zeigt die Rezepte vorher an.
+
+## Änderung 13.11.: Farben, Startseiten-Icon
+- Palette: Powder Petal `#E8D6CB`, Dark Coffee `#321B0C`, Razzmatazz
+  `#E2116B` (Hauptknopf, Favorit), Senfgelb `#E1AD01` (Kategorie,
+  Sterne dunkel), Hunter Green / Seagrass (Bestätigung). Tokens in
+  `style.css`.
+- Kochmützen-Haus links in jeder Kopfzeile (`home_link` in `form.js`),
+  nicht auf geteilten Seiten; auf der Liste scrollt es nach oben.
+- Rezeptformular mit Eingaben: Links fragen «Änderungen verwerfen?».
+- App-Icons neu (Kochmützen-Haus auf Razzmatazz).
+- Caddy: `.js`/`.css` mit `Cache-Control: no-cache`.

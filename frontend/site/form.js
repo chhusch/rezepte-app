@@ -20,6 +20,19 @@ const NUTRITION_FIELDS = [
 	["fat_g", "Fett (g)"],
 ];
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+const LIST_HASHES = ["", "#", "#/"];
+/* Chef's hat that turns into a house: link to the recipe list. */
+const HOME_ICON = [
+	["path", { d: "M9 17a4.5 4.5 0 0 1 0-9 7 7 0 0 1 14 0 " +
+		      "4.5 4.5 0 0 1 0 9z" }],
+	["path", { d: "M9 17v11h14V17" }],
+	["path", { d: "M14 28v-5a2 2 0 0 1 4 0v5" }],
+	["circle", { cx: 12.5, cy: 12.5, r: 1.2, fill: "currentColor" }],
+	["circle", { cx: 19.5, cy: 12.5, r: 1.2, fill: "currentColor" }],
+	["path", { d: "M14.5 14.2q1.5 1 3 0" }],
+];
+
 let toast_timer = null;
 
 /* ------------------------------------------------------------------ */
@@ -83,10 +96,48 @@ export function back_button(href)
 			"aria-label": "Zurück" }, "‹");
 }
 
+function svg(tag, attrs)
+{
+	const el = document.createElementNS(SVG_NS, tag);
+	for (const [k, v] of Object.entries(attrs))
+		el.setAttribute(k, v);
+	return el;
+}
+
+function home_icon()
+{
+	const el = svg("svg", { viewBox: "0 0 32 32", fill: "none",
+				stroke: "currentColor", "stroke-width": 2.2,
+				"stroke-linecap": "round",
+				"stroke-linejoin": "round",
+				"aria-hidden": "true" });
+	for (const [tag, attrs] of HOME_ICON)
+		el.append(svg(tag, attrs));
+	return el;
+}
+
+/* On the list itself the link scrolls back to the top. */
+export function home_link()
+{
+	return h("a", { class: "home", href: "#/", "aria-label": "Startseite",
+			onclick: (ev) => {
+		if (!LIST_HASHES.includes(location.hash))
+			return;
+		ev.preventDefault();
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	} }, home_icon());
+}
+
 export function topbar(title, ...actions)
 {
-	return h("header", { class: "topbar" },
+	return h("header", { class: "topbar" }, home_link(),
 		h("h1", {}, title), ...actions);
+}
+
+/* Shared recipe pages: no way into the private app. */
+export function public_topbar(title)
+{
+	return h("header", { class: "topbar" }, h("h1", {}, title));
 }
 
 export function str(v)
@@ -491,7 +542,10 @@ export function recipe_form(data, cats, opts)
 		},
 	});
 
-	return h("form", { onsubmit: async (ev) => {
+	/* data-dirty: app.js asks before a link leaves the form. */
+	return h("form", { oninput: (ev) => {
+		ev.currentTarget.dataset.dirty = "1";
+	}, onsubmit: async (ev) => {
 		ev.preventDefault();
 		save.disabled = true;
 		try {

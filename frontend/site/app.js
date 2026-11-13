@@ -383,11 +383,19 @@ function cooked_line(r)
 		join_present([r.cooked_count + "× gekocht", last], ", "));
 }
 
+/* Category as a label, then the tags. */
+function category_meta(r, tag, cls)
+{
+	const tags = (r.tags || []).map(t => "#" + t).join(" ");
+	const cat = r.category ?
+		h("span", { class: "cat" }, r.category.name) : null;
+	if (!cat && !tags)
+		return null;
+	return h(tag, { class: cls }, cat, cat && tags ? " · " : null, tags);
+}
+
 function recipe_card(r)
 {
-	const cat = r.category ? r.category.name : "";
-	const tags = (r.tags || []).map(t => "#" + t).join(" ");
-	const meta = join_present([cat, tags], " · ");
 	return h("li", {},
 		h("a", { class: "card", href: "#/recipe/" + r.id },
 			r.thumb_url ? h("img", { class: "thumb", alt: "",
@@ -397,7 +405,7 @@ function recipe_card(r)
 				h("div", { class: "title" },
 					r.favorite ? star() : null,
 					h("span", {}, r.title)),
-				meta ? h("div", { class: "meta" }, meta) : null,
+				category_meta(r, "div", "meta"),
 				cooked_line(r))));
 }
 
@@ -1013,9 +1021,6 @@ function detail_el(r, opts)
 			"Eigene Version anzeigen" : "Original anzeigen";
 		body.replaceChildren(version_section(r.id, v));
 	} }, "Original anzeigen");
-	const cat = r.category ? r.category.name : "";
-	const tags = (r.tags || []).map(t => "#" + t).join(" ");
-	const meta = join_present([cat, tags], " · ");
 	const del = h("button", { type: "button", class: "btn-danger",
 				  onclick: () => remove_recipe(r.id) },
 		      "Löschen");
@@ -1024,7 +1029,7 @@ function detail_el(r, opts)
 		topbar(r.own.title, back_button("#/"), favorite_button(r)),
 		h("main", {},
 			title,
-			meta ? h("p", { class: "meta-line" }, meta) : null,
+			category_meta(r, "p", "meta-line"),
 			source_line(r.source),
 			photo_section(r),
 			h("div", { class: "actions" },
@@ -1131,8 +1136,24 @@ function register_sw()
 	navigator.serviceWorker.register("/sw.js").catch(() => {});
 }
 
+/*
+ * A link out of a recipe form with unsaved input asks first. Saving
+ * navigates without a click and is not affected.
+ */
+function guard_dirty_form(ev)
+{
+	const a = ev.target.closest && ev.target.closest('a[href^="#"]');
+	if (!a || !document.querySelector("form[data-dirty]"))
+		return;
+	if (confirm("Änderungen verwerfen?"))
+		return;
+	ev.preventDefault();
+	ev.stopPropagation();
+}
+
 function start()
 {
+	document.addEventListener("click", guard_dirty_form, true);
 	window.addEventListener(API.UNAUTHORIZED_EVENT, () => {
 		if (state.user && !is_public(location.hash)) {
 			state.user = null;
