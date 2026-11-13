@@ -3,15 +3,17 @@
  *
  * Routes: #/login, #/ (list), #/recipe/ID, #/new, #/edit/ID,
  * #/cook/ID (cook.js), #/import (import.js), #/shopping and
- * #/pantry (shopping.js), #/s/TOKEN (share.js, public). All user
- * text is rendered through h() / textContent, never innerHTML. DOM
- * helpers and the recipe form live in form.js.
+ * #/pantry (shopping.js), #/categories (categories.js), #/s/TOKEN
+ * (share.js, public). All user text is rendered through h() /
+ * textContent, never innerHTML. DOM helpers and the recipe form live
+ * in form.js.
  */
 
 import * as API from "./api.js";
 import { view_cook } from "./cook.js";
 import { view_import } from "./import.js";
 import { view_shopping, view_pantry } from "./shopping.js";
+import { view_categories } from "./categories.js";
 import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
@@ -59,6 +61,7 @@ const ROUTES = [
 		ingredient_text: ingredient_text })],
 	[/^#\/shopping$/, view_shopping],
 	[/^#\/pantry$/, view_pantry],
+	[/^#\/categories$/, view_categories],
 	[/^#\/s\/([A-Za-z0-9_-]+)$/, view_shared_route],
 ];
 
@@ -335,6 +338,9 @@ async function load_taxonomy()
 		API.list_categories(), API.list_tags()]);
 	state.categories = cats || [];
 	state.tags = tags || [];
+	const ids = state.categories.map(c => String(c.id));
+	if (!ids.includes(String(filter.category)))
+		filter.category = "";
 }
 
 function category_options(selected, empty_label)
@@ -476,6 +482,7 @@ async function view_list()
 				"+ Neu"),
 			h("a", { class: "btn", href: "#/import" }, "Import"),
 			menu(h("a", { href: "#/shopping" }, "Einkaufsliste"),
+			     h("a", { href: "#/categories" }, "Kategorien"),
 			     h("a", { href: API.export_url(),
 				      download: "rezepte.zip" }, "Export"),
 			     h("button", { type: "button", onclick: logout },

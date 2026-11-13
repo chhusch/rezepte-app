@@ -151,6 +151,22 @@ export function create_category(name)
 	return api("POST", "/categories", { name });
 }
 
+export function rename_category(id, name)
+{
+	return api("PUT", "/categories/" + encodeURIComponent(id), { name });
+}
+
+export function delete_category(id)
+{
+	return api("DELETE", "/categories/" + encodeURIComponent(id));
+}
+
+export function category_recipes(id)
+{
+	return api("GET", "/categories/" + encodeURIComponent(id) +
+		   "/recipes");
+}
+
 export function list_tags()
 {
 	return api("GET", "/tags");

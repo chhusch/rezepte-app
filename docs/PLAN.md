@@ -344,3 +344,12 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
   (409, sobald einer existiert; Passwort mind. 8 Zeichen) und meldet
   an. Login-Ansicht zeigt bei `needed` das Formular «Benutzer anlegen».
 - `set-password` und `purge-sessions` bleiben in der CLI.
+
+## Änderung 13.11.: Kategorien verwalten
+- `GET /api/categories` liefert zusätzlich `recipe_count`.
+- `PUT /api/categories/{id}` `{name}`: umbenennen; 409, wenn der Name
+  (ohne Gross-/Kleinschreibung) schon vergeben ist.
+- `GET /api/categories/{id}/recipes`: `[{id, title}]`.
+- `DELETE /api/categories/{id}`: 204; Rezepte bleiben, ohne Kategorie.
+- Ansicht `#/categories` (`categories.js`), im Menü der Liste.
+  Löschen einer verwendeten Kategorie zeigt die Rezepte vorher an.
