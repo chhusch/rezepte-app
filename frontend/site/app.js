@@ -486,9 +486,9 @@ async function view_list()
 	await fill_list(ul);
 	return h("div", {},
 		topbar("Rezepte",
-			h("a", { class: "btn btn-primary", href: "#/new" },
-				"+ Neu"),
-			h("a", { class: "btn", href: "#/import" }, "Import"),
+			h("a", { class: "btn btn-primary", href: "#/import" },
+				"Import"),
+			h("a", { class: "btn", href: "#/new" }, "+ Neu"),
 			menu(h("a", { href: "#/shopping" }, "Einkaufsliste"),
 			     h("a", { href: "#/categories" }, "Kategorien"),
 			     h("a", { href: API.export_url(),
