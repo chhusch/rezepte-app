@@ -2,8 +2,8 @@
 
 ## Kontext
 Private Rezeptsammlung für eine Person, bedient hauptsächlich auf dem
-Handy (iPhone und Android) in der Küche. Ich bin kein Profi-Entwickler,
-arbeite ca. 1 Stunde pro Woche daran und habe wenig Docker-Erfahrung.
+Handy (iPhone und Android) in der Küche. Ich bin kein Profi-Entwickler
+und habe wenig Docker-Erfahrung.
 Du baust eine solide, professionelle Lösung, keine Einsteigervariante.
 
 ## Problem, das gelöst wird

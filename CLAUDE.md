@@ -6,7 +6,7 @@ Projektauftrag steht in `docs/AUFTRAG.md`, der Stand je Phase in
 
 ## Kontext
 Rezeptsammlung für eine Person, Handy in der Küche. Der Betreiber
-arbeitet ca. 1 Stunde pro Woche daran und hat wenig Docker-Erfahrung.
+hat wenig Docker-Erfahrung.
 
 ## Technologie (fest vorgegeben)
 - Backend: Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2
