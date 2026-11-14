@@ -140,6 +140,22 @@ export function public_topbar(title)
 	return h("header", { class: "topbar" }, h("h1", {}, title));
 }
 
+/* Bottom sheet with a title; returns its close function. */
+export function open_sheet(title, ...items)
+{
+	const close = () => box.remove();
+	const box = h("div", { class: "sheet-bg", onclick: (ev) => {
+		if (ev.target === box)
+			close();
+	} },
+		h("div", { class: "sheet form-sheet", role: "dialog" },
+			h("h2", {}, title), items,
+			h("button", { type: "button", onclick: close },
+				"Abbrechen")));
+	document.body.append(box);
+	return close;
+}
+
 export function str(v)
 {
 	return v === null || v === undefined ? "" : String(v);

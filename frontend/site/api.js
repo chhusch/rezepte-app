@@ -379,3 +379,25 @@ export function add_shopping_bulk(items)
 {
 	return api("POST", "/shopping/bulk", { items });
 }
+
+/* ---- Freezer ---- */
+
+export function list_freezer()
+{
+	return api("GET", "/freezer");
+}
+
+export function add_freezer(item)
+{
+	return api("POST", "/freezer", item);
+}
+
+export function update_freezer(id, item)
+{
+	return api("PUT", "/freezer/" + encodeURIComponent(id), item);
+}
+
+export function delete_freezer(id)
+{
+	return api("DELETE", "/freezer/" + encodeURIComponent(id));
+}

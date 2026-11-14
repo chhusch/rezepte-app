@@ -382,3 +382,19 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
 - Oberfläche `plan.js`: `#/plan` (4 Tage ab heute oder Woche Mo–So),
   `#/plan/shopping?start&days` (Vorräte und Zeilen auf der Liste
   abgewählt).
+
+## Phase B 14.11.: Gefriertruhe
+- Tabelle `freezer_items` (Migration 0004): Name, Menge, Einheit,
+  Notiz, eingefroren am (Standard heute).
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| GET/POST | /api/freezer | Liste, älteste zuerst / anlegen |
+| PUT/DELETE | /api/freezer/{id} | ändern / entfernen |
+
+- `#/freezer` (`freezer.js`): älter als 90 Tage senfgelb markiert;
+  «Raus» zieht Menge ab oder entfernt; «Rezepte» öffnet
+  `#/?zutaten=NAME`.
+- Menüplan-Zutaten: `freezer` markiert und abgewählt, wenn alle Wörter
+  eines Namens im anderen vorkommen.
+- Export Version 2: `recipes.json` zusätzlich mit `plan` und `freezer`.

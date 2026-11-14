@@ -4,7 +4,7 @@
  * Routes: #/login, #/ (list), #/recipe/ID, #/new, #/edit/ID,
  * #/cook/ID (cook.js), #/import (import.js), #/shopping and
  * #/pantry (shopping.js), #/categories (categories.js), #/plan and
- * #/plan/shopping (plan.js), #/s/TOKEN
+ * #/plan/shopping (plan.js), #/freezer (freezer.js), #/s/TOKEN
  * (share.js, public). All user text is rendered through h() /
  * textContent, never innerHTML. DOM helpers and the recipe form live
  * in form.js.
@@ -16,6 +16,7 @@ import { view_import } from "./import.js";
 import { view_shopping, view_pantry } from "./shopping.js";
 import { view_categories } from "./categories.js";
 import { view_plan, view_plan_shopping } from "./plan.js";
+import { view_freezer } from "./freezer.js";
 import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
@@ -53,7 +54,7 @@ const filter = {
 
 const ROUTES = [
 	[/^#\/login$/, view_login],
-	[/^#\/?$/, view_list],
+	[/^#\/?(?:\?zutaten=(.*))?$/, view_list],
 	[/^#\/recipe\/(\d+)(\?cooked)?$/, view_detail],
 	[/^#\/new$/, view_form],
 	[/^#\/edit\/(\d+)$/, view_form],
@@ -65,6 +66,7 @@ const ROUTES = [
 	[/^#\/pantry$/, view_pantry],
 	[/^#\/categories$/, view_categories],
 	[/^#\/plan$/, view_plan],
+	[/^#\/freezer$/, view_freezer],
 	[/^#\/plan\/shopping\?(.*)$/, view_plan_shopping],
 	[/^#\/s\/([A-Za-z0-9_-]+)$/, view_shared_route],
 ];
@@ -482,8 +484,13 @@ function filter_bar(on_change)
 			names.map(n => tag_chip(n, on_change))));
 }
 
-async function view_list()
+/* #/?zutaten=X (from the freezer) sets the ingredient filter. */
+async function view_list(zutaten)
 {
+	if (zutaten !== undefined) {
+		filter.ingredients = decodeURIComponent(zutaten);
+		history.replaceState(null, "", "#/");
+	}
 	await load_taxonomy();
 	const ul = h("ul", { class: "cards" });
 	const reload = () => fill_list(ul);
@@ -494,6 +501,7 @@ async function view_list()
 				"Import"),
 			h("a", { class: "btn", href: "#/new" }, "+ Neu"),
 			menu(h("a", { href: "#/plan" }, "Menüplan"),
+			     h("a", { href: "#/freezer" }, "Gefriertruhe"),
 			     h("a", { href: "#/shopping" }, "Einkaufsliste"),
 			     h("a", { href: "#/categories" }, "Kategorien"),
 			     h("a", { href: API.export_url(),

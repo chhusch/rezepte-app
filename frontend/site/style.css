@@ -29,6 +29,7 @@
 	--danger: #9a3412;
 	--danger-fg: #ffffff;
 	--shadow: 0 1px 3px rgba(50, 27, 12, 0.08);
+	color-scheme: light;
 	--radius: 12px;
 	--touch: 48px;
 	--gap: 12px;
@@ -57,6 +58,7 @@
 		--danger: #f2a08a;
 		--danger-fg: #321b0c;
 		--shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+		color-scheme: dark;
 	}
 }
 
@@ -1176,6 +1178,45 @@ button[aria-disabled="true"] {
 	opacity: 0.5;
 }
 
+/* Freezer */
+.freezer .item {
+	border-left: 6px solid transparent;
+	padding-left: 8px;
+}
+
+.freezer .item.old {
+	border-left-color: var(--mark-mustard);
+}
+
+.freezer-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 6px 0;
+	border: none;
+	background: none;
+	text-align: left;
+}
+
+.freezer-age {
+	display: block;
+}
+
+.freezer .btn {
+	flex: 0 0 auto;
+	padding: 0 14px;
+}
+
+.freezer + .shop-add input[type="date"] {
+	flex: 1.6 1 0;
+}
+
+.shop-add > .btn-primary {
+	width: 100%;
+}
+
 /* Meal plan */
 .plan-nav {
 	display: flex;
@@ -1277,12 +1318,12 @@ button[aria-disabled="true"] {
 	display: block;
 }
 
-.plan-sheet {
+.form-sheet {
 	max-height: 90vh;
 	overflow-y: auto;
 }
 
-.plan-sheet h2 {
+.form-sheet h2 {
 	margin: 0;
 	font-size: 1.1rem;
 }
@@ -1293,7 +1334,7 @@ button[aria-disabled="true"] {
 	gap: 6px;
 }
 
-.plan-sheet .plan-hit {
+.form-sheet .plan-hit {
 	justify-content: flex-start;
 	min-height: 44px;
 	text-align: left;

@@ -10,7 +10,7 @@
 
 import * as API from "./api.js";
 import {
-	h, toast, error_msg, back_button, topbar, fmt_amount,
+	h, toast, error_msg, back_button, topbar, fmt_amount, open_sheet,
 } from "./form.js";
 
 const VIEW_KEY = "plan:view";
@@ -117,22 +117,6 @@ function range()
 /* ------------------------------------------------------------------ */
 /* Sheets                                                              */
 /* ------------------------------------------------------------------ */
-
-/* Bottom sheet; returns its close function. */
-function open_sheet(title, ...items)
-{
-	const close = () => box.remove();
-	const box = h("div", { class: "sheet-bg", onclick: (ev) => {
-		if (ev.target === box)
-			close();
-	} },
-		h("div", { class: "sheet plan-sheet", role: "dialog" },
-			h("h2", {}, title), items,
-			h("button", { type: "button", onclick: close },
-				"Abbrechen")));
-	document.body.append(box);
-	return close;
-}
 
 async function all_recipes()
 {
@@ -358,13 +342,19 @@ function hint(i)
 {
 	if (i.on_list)
 		return "schon auf der Liste";
+	if (i.freezer)
+		return "in der Gefriertruhe";
 	return i.pantry ? "Vorrat" : "";
+}
+
+function needed(i)
+{
+	return !i.pantry && !i.on_list && !i.freezer;
 }
 
 function ingredient_line(i)
 {
-	const box = h("input", { type: "checkbox",
-				 checked: !i.pantry && !i.on_list });
+	const box = h("input", { type: "checkbox", checked: needed(i) });
 	const qty = [fmt_amount(i.amount), i.unit].filter(Boolean).join(" ");
 	const extra = [hint(i), i.recipes.join(", ")].filter(Boolean);
 	const el = h("li", { class: "item" },
@@ -406,8 +396,8 @@ export async function view_plan_shopping(query)
 	const start = p.get("start");
 	const days = Number(p.get("days")) || VIEW_DAYS.four;
 	const list = await API.plan_ingredients(start, days);
-	const need = (i) => !i.pantry && !i.on_list;
-	const sorted = list.filter(need).concat(list.filter(i => !need(i)));
+	const sorted = list.filter(needed).concat(
+		list.filter(i => !needed(i)));
 	const lines = sorted.map(ingredient_line);
 	const btn = h("button", { type: "button", class: "btn-primary",
 				  onclick: () => to_shopping(lines, btn) },
