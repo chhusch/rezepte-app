@@ -20,6 +20,10 @@
 	--chip-on-bg: #321b0c;
 	--chip-on-fg: #f6eee9;
 	--cat-pad: 0 8px;
+	--mark-razz: #e2116b;
+	--mark-mustard: #e1ad01;
+	--mark-sea: #539987;
+	--mark-coffee: #321b0c;
 	--ok: #325d46;
 	--ok-fg: #ffffff;
 	--danger: #9a3412;
@@ -45,6 +49,7 @@
 		--cat-bg: transparent;
 		--cat-fg: #e1ad01;
 		--cat-pad: 0;
+		--mark-coffee: #bfa392;
 		--chip-on-bg: #e8d6cb;
 		--chip-on-fg: #321b0c;
 		--ok: #8cc4b2;
@@ -1170,6 +1175,158 @@ details.nutrition .row label {
 button[aria-disabled="true"] {
 	opacity: 0.5;
 }
+
+/* Meal plan */
+.plan-nav {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: var(--gap);
+}
+
+.plan-range {
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.plan-nav .chips {
+	margin-left: auto;
+}
+
+.plan-days {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap);
+}
+
+.plan-day {
+	padding: 8px var(--gap) var(--gap);
+	background: var(--bg-card);
+	border-radius: var(--radius);
+	border-left: 6px solid transparent;
+	box-shadow: var(--shadow);
+}
+
+.plan-day.today .plan-day-head h2 {
+	color: var(--accent);
+}
+
+
+.plan-day-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.plan-day-head h2 {
+	margin: 0;
+	font-size: 1.1rem;
+}
+
+.plan-note {
+	margin: 0 0 4px;
+	color: var(--fg-muted);
+	white-space: pre-wrap;
+}
+
+.slot {
+	border-top: 1px solid var(--line);
+}
+
+.slot-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 40px;
+	color: var(--fg-muted);
+	font-size: 0.9rem;
+}
+
+.slot-head .btn-link {
+	min-height: 40px;
+	font-size: 1.3rem;
+	text-decoration: none;
+}
+
+.entries {
+	list-style: none;
+	margin: 0 0 6px;
+	padding: 0;
+}
+
+.entries li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 40px;
+}
+
+.entries .text {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.entries .note, .plan-src {
+	color: var(--fg-muted);
+	font-size: 0.85rem;
+}
+
+.plan-src {
+	display: block;
+}
+
+.plan-sheet {
+	max-height: 90vh;
+	overflow-y: auto;
+}
+
+.plan-sheet h2 {
+	margin: 0;
+	font-size: 1.1rem;
+}
+
+.plan-hits {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.plan-sheet .plan-hit {
+	justify-content: flex-start;
+	min-height: 44px;
+	text-align: left;
+}
+
+.swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.swatch {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+	padding: 4px 10px 4px 6px;
+	border: 1px solid var(--line);
+	border-left-width: 6px;
+	border-radius: var(--radius);
+}
+
+.swatch input[type="radio"] {
+	width: 22px;
+	height: 22px;
+	margin: 0;
+}
+
+/* After .swatch so its border shorthand does not win. */
+.mark-razz { border-left-color: var(--mark-razz); }
+.mark-mustard { border-left-color: var(--mark-mustard); }
+.mark-sea { border-left-color: var(--mark-sea); }
+.mark-coffee { border-left-color: var(--mark-coffee); }
 
 /* Bottom sheet */
 .sheet-bg {

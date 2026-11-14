@@ -3,7 +3,8 @@
  *
  * Routes: #/login, #/ (list), #/recipe/ID, #/new, #/edit/ID,
  * #/cook/ID (cook.js), #/import (import.js), #/shopping and
- * #/pantry (shopping.js), #/categories (categories.js), #/s/TOKEN
+ * #/pantry (shopping.js), #/categories (categories.js), #/plan and
+ * #/plan/shopping (plan.js), #/s/TOKEN
  * (share.js, public). All user text is rendered through h() /
  * textContent, never innerHTML. DOM helpers and the recipe form live
  * in form.js.
@@ -14,6 +15,7 @@ import { view_cook } from "./cook.js";
 import { view_import } from "./import.js";
 import { view_shopping, view_pantry } from "./shopping.js";
 import { view_categories } from "./categories.js";
+import { view_plan, view_plan_shopping } from "./plan.js";
 import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
@@ -62,6 +64,8 @@ const ROUTES = [
 	[/^#\/shopping$/, view_shopping],
 	[/^#\/pantry$/, view_pantry],
 	[/^#\/categories$/, view_categories],
+	[/^#\/plan$/, view_plan],
+	[/^#\/plan\/shopping\?(.*)$/, view_plan_shopping],
 	[/^#\/s\/([A-Za-z0-9_-]+)$/, view_shared_route],
 ];
 
@@ -489,7 +493,8 @@ async function view_list()
 			h("a", { class: "btn btn-primary", href: "#/import" },
 				"Import"),
 			h("a", { class: "btn", href: "#/new" }, "+ Neu"),
-			menu(h("a", { href: "#/shopping" }, "Einkaufsliste"),
+			menu(h("a", { href: "#/plan" }, "Menüplan"),
+			     h("a", { href: "#/shopping" }, "Einkaufsliste"),
 			     h("a", { href: "#/categories" }, "Kategorien"),
 			     h("a", { href: API.export_url(),
 				      download: "rezepte.zip" }, "Export"),

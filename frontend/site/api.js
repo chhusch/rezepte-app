@@ -347,3 +347,35 @@ export function todo_push()
 {
 	return api("POST", "/todo/push");
 }
+
+/* ---- Meal plan ---- */
+
+export function get_plan(start, days)
+{
+	return api("GET", "/plan" + query({ start, days }));
+}
+
+export function plan_ingredients(start, days)
+{
+	return api("GET", "/plan/ingredients" + query({ start, days }));
+}
+
+export function set_plan_day(day, data)
+{
+	return api("PUT", "/plan/days/" + encodeURIComponent(day), data);
+}
+
+export function add_plan_entry(entry)
+{
+	return api("POST", "/plan/entries", entry);
+}
+
+export function delete_plan_entry(id)
+{
+	return api("DELETE", "/plan/entries/" + encodeURIComponent(id));
+}
+
+export function add_shopping_bulk(items)
+{
+	return api("POST", "/shopping/bulk", { items });
+}

@@ -364,3 +364,21 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
 - Rezeptformular mit Eingaben: Links fragen «Änderungen verwerfen?».
 - App-Icons neu (Kochmützen-Haus auf Razzmatazz).
 - Caddy: `.js`/`.css` mit `Cache-Control: no-cache`.
+
+## Phase A 14.11.: Menüplan
+- Tabellen (Migration 0003): `plan_days` (Datum, Notiz, Farbe
+  `razz|mustard|sea|coffee`, Frühstück/Zvieri ein) und `plan_entries`
+  (Datum, Mahlzeit `breakfast|lunch|zvieri|dinner`, Reihenfolge,
+  Rezept oder Text, Portionen). Rezept gelöscht: Titel bleibt als Text.
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| GET | /api/plan?start&days | Tage 1–14 mit Einträgen |
+| GET | /api/plan/ingredients?start&days | Zutaten zusammengezählt, `pantry`, `on_list` |
+| PUT | /api/plan/days/{datum} | Notiz, Farbe, Frühstück, Zvieri |
+| POST/PUT/DELETE | /api/plan/entries[/{id}] | Eintrag; Verschieben ans Ende der Mahlzeit |
+| POST | /api/shopping/bulk | `{items}`, mit offenen Zeilen zusammengeführt |
+
+- Oberfläche `plan.js`: `#/plan` (4 Tage ab heute oder Woche Mo–So),
+  `#/plan/shopping?start&days` (Vorräte und Zeilen auf der Liste
+  abgewählt).
