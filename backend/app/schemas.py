@@ -13,9 +13,13 @@ from pydantic import (
 	model_validator,
 )
 
-from app.models import NAME_LEN, UNIT_LEN
+from app.models import NAME_LEN, UNIT_LEN, MealSlot
 
 SourceKindName = Literal["url", "book", "none"]
+PlanColor = Literal["razz", "mustard", "sea", "coffee"]
+MAX_SERVINGS = 100
+MAX_BULK = 300
+DAY_NOTE_LEN = 2000
 
 
 def amount_to_str(value: Decimal | None) -> str | None:
@@ -420,3 +424,75 @@ class TodoStatus(BaseModel):
 class TodoPushOut(BaseModel):
 	added: int
 	skipped: int
+
+
+class ShoppingBulkIn(BaseModel):
+	items: list[ShoppingItemIn] = Field(max_length=MAX_BULK)
+
+
+class PlanEntryIn(BaseModel):
+	"""A recipe (text optional) or a free text."""
+	day: date
+	slot: MealSlot
+	recipe_id: int | None = None
+	text: str = Field(default="", max_length=NAME_LEN)
+	servings: int | None = Field(default=None, ge=1, le=MAX_SERVINGS)
+
+	@field_validator("text", mode="before")
+	@classmethod
+	def strip_text(cls, value):
+		if value is None:
+			return ""
+		return value.strip() if isinstance(value, str) else value
+
+	@model_validator(mode="after")
+	def recipe_or_text(self):
+		if self.recipe_id is None and not self.text:
+			raise ValueError("entry needs a recipe or a text")
+		return self
+
+
+class PlanEntryOut(BaseModel):
+	id: int
+	day: date
+	slot: MealSlot
+	position: int
+	recipe_id: int | None
+	title: str
+	servings: int | None
+
+
+class PlanDayIn(BaseModel):
+	note: str = Field(default="", max_length=DAY_NOTE_LEN)
+	color: PlanColor | None = None
+	breakfast: bool = False
+	zvieri: bool = False
+
+	@field_validator("note", mode="before")
+	@classmethod
+	def strip_text(cls, value):
+		if value is None:
+			return ""
+		return value.strip() if isinstance(value, str) else value
+
+
+class PlanDayOut(PlanDayIn):
+	day: date
+	entries: list[PlanEntryOut]
+
+
+class PlanIngredientOut(BaseModel):
+	"""Merged ingredient of the planned recipes; pantry and on_list
+	mark lines that need not be bought."""
+	name: str
+	unit: str
+	amount: Decimal | None
+	note: str
+	recipes: list[str]
+	pantry: bool
+	on_list: bool
+
+	@field_serializer("amount")
+	def ser_amount(self, value):
+		return amount_to_str(value)
+

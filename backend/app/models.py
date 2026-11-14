@@ -28,6 +28,7 @@ NAME_LEN = 200
 UNIT_LEN = 50
 FILENAME_LEN = 255
 TOKEN_LEN = 64
+COLOR_LEN = 20
 
 
 class Base(DeclarativeBase):
@@ -43,6 +44,13 @@ class SourceKind(str, enum.Enum):
 class VersionKind(str, enum.Enum):
 	ORIGINAL = "original"
 	OWN = "own"
+
+
+class MealSlot(str, enum.Enum):
+	BREAKFAST = "breakfast"
+	LUNCH = "lunch"
+	ZVIERI = "zvieri"
+	DINNER = "dinner"
 
 
 class User(Base):
@@ -279,3 +287,35 @@ class Integration(Base):
 	updated_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True), server_default=func.now(),
 		onupdate=func.now())
+
+
+class PlanDay(Base):
+	"""Day note, highlight colour and the optional meals of one day."""
+	__tablename__ = "plan_days"
+
+	day: Mapped[date] = mapped_column(Date, primary_key=True)
+	note: Mapped[str] = mapped_column(Text, default="")
+	color: Mapped[str | None] = mapped_column(String(COLOR_LEN))
+	breakfast: Mapped[bool] = mapped_column(Boolean, default=False)
+	zvieri: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class PlanEntry(Base):
+	"""A recipe or a free text in one meal of one day.
+
+	text keeps the recipe title so the entry survives deleting the
+	recipe (recipe_id becomes NULL).
+	"""
+	__tablename__ = "plan_entries"
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	day: Mapped[date] = mapped_column(Date, index=True)
+	slot: Mapped[MealSlot] = mapped_column(
+		Enum(MealSlot, name="meal_slot"))
+	position: Mapped[int] = mapped_column(Integer)
+	recipe_id: Mapped[int | None] = mapped_column(
+		ForeignKey("recipes.id", ondelete="SET NULL"), index=True)
+	text: Mapped[str] = mapped_column(String(NAME_LEN), default="")
+	servings: Mapped[int | None] = mapped_column(Integer)
+
+	recipe: Mapped["Recipe | None"] = relationship()

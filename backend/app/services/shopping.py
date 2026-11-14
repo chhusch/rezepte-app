@@ -138,6 +138,29 @@ def add_from_recipe(db: Session, recipe_id: int,
 	return touched
 
 
+def add_many(db: Session,
+	     items: list[ShoppingItemIn]) -> list[ShoppingItem]:
+	"""Add lines, merging into open lines with the same name and unit."""
+	known = unchecked_by_key(db)
+	touched: list[ShoppingItem] = []
+	for data in items:
+		key = key_of(data.name, data.unit)
+		item = known.get(key)
+		if item is not None:
+			merge(item, data.amount, data.note)
+		else:
+			item = ShoppingItem(name=data.name, unit=data.unit,
+					    amount=data.amount, note=data.note)
+			db.add(item)
+			known[key] = item
+		if item not in touched:
+			touched.append(item)
+	db.commit()
+	for item in touched:
+		db.refresh(item)
+	return touched
+
+
 def put_ingredient(db: Session, known: dict[Key, ShoppingItem],
 		   ing: Ingredient, factor: Decimal,
 		   recipe_id: int) -> ShoppingItem:

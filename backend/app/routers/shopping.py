@@ -7,6 +7,7 @@ from app.db import get_db
 from app.deps import current_user
 from app.schemas import (
 	CheckedIn,
+	ShoppingBulkIn,
 	ShoppingFromRecipeIn,
 	ShoppingItemIn,
 	ShoppingItemOut,
@@ -48,6 +49,11 @@ def add_from_recipe(recipe_id: int, data: ShoppingFromRecipeIn,
 	if items is None:
 		raise HTTPException(status_code=404, detail=RECIPE_NOT_FOUND)
 	return [to_out(i) for i in items]
+
+
+@router.post("/bulk", response_model=list[ShoppingItemOut])
+def add_many(data: ShoppingBulkIn, db: Session = Depends(get_db)):
+	return [to_out(i) for i in service.add_many(db, data.items)]
 
 
 # before /{item_id}, otherwise "checked" would be parsed as an id
