@@ -482,8 +482,8 @@ class PlanDayOut(PlanDayIn):
 
 
 class PlanIngredientOut(BaseModel):
-	"""Merged ingredient of the planned recipes; pantry and on_list
-	mark lines that need not be bought."""
+	"""Merged ingredient of the planned recipes; pantry, on_list and
+	freezer mark lines that need not be bought."""
 	name: str
 	unit: str
 	amount: Decimal | None
@@ -491,6 +491,38 @@ class PlanIngredientOut(BaseModel):
 	recipes: list[str]
 	pantry: bool
 	on_list: bool
+	freezer: bool
+
+	@field_serializer("amount")
+	def ser_amount(self, value):
+		return amount_to_str(value)
+
+
+class FreezerItemIn(BaseModel):
+	"""frozen_on defaults to today."""
+	name: str = Field(min_length=1, max_length=NAME_LEN)
+	amount: Decimal | None = Field(default=None, ge=0)
+	unit: str = Field(default="", max_length=UNIT_LEN)
+	note: str = Field(default="", max_length=NAME_LEN)
+	frozen_on: date | None = None
+
+	@field_validator("name", "unit", "note", mode="before")
+	@classmethod
+	def strip_text(cls, value):
+		if value is None:
+			return ""
+		return value.strip() if isinstance(value, str) else value
+
+
+class FreezerItemOut(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
+	id: int
+	name: str
+	amount: Decimal | None
+	unit: str
+	note: str
+	frozen_on: date
 
 	@field_serializer("amount")
 	def ser_amount(self, value):

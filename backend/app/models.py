@@ -319,3 +319,15 @@ class PlanEntry(Base):
 	servings: Mapped[int | None] = mapped_column(Integer)
 
 	recipe: Mapped["Recipe | None"] = relationship()
+
+
+class FreezerItem(Base):
+	__tablename__ = "freezer_items"
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	name: Mapped[str] = mapped_column(String(NAME_LEN))
+	amount: Mapped[Decimal | None] = mapped_column(Numeric(10, 3))
+	unit: Mapped[str] = mapped_column(String(UNIT_LEN), default="")
+	note: Mapped[str] = mapped_column(String(NAME_LEN), default="")
+	frozen_on: Mapped[date] = mapped_column(Date)
+

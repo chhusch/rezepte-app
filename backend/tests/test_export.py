@@ -66,8 +66,8 @@ def test_export_json_shape(auth_client, seeded):
 	zf = fetch_zip(auth_client)
 	data = json.loads(zf.read("recipes.json"))
 	assert set(data) == {"exported_at", "version", "categories",
-			     "tags", "recipes"}
-	assert data["version"] == 1
+			     "tags", "recipes", "plan", "freezer"}
+	assert data["version"] == 2
 	assert [c["name"] for c in data["categories"]] == ["Suppen"]
 	assert sorted(t["name"] for t in data["tags"]) == ["backen",
 							   "vegi"]

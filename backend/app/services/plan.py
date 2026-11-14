@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models import PlanDay, PlanEntry, Recipe, RecipeVersion
 from app.schemas import PlanDayIn, PlanEntryIn
-from app.services import pantry, shopping
+from app.services import freezer, pantry, shopping
 
 MAX_DAYS = 14
 
@@ -79,6 +79,17 @@ def get_plan(db: Session, start: date, days: int) -> list[dict]:
 	for e in entries_between(db, start, days):
 		by_day[e.day].append(entry_out(e))
 	return [day_out(d, rows.get(d), by_day[d]) for d in by_day]
+
+
+def all_days(db: Session) -> list[dict]:
+	"""Every day that has entries or settings, for the export."""
+	stmt = select(PlanEntry.day).union(select(PlanDay.day))
+	days = sorted(db.scalars(stmt))
+	if not days:
+		return []
+	span = (days[-1] - days[0]).days + 1
+	used = set(days)
+	return [d for d in get_plan(db, days[0], span) if d["day"] in used]
 
 
 def recipe_title(db: Session, recipe_id: int | None) -> str | None:
@@ -193,7 +204,9 @@ def ingredients(db: Session, start: date, days: int) -> list[dict]:
 			add_line(lines, ing, factor_of(e, own), own.title)
 	staples = pantry.pantry_names(db)
 	listed = shopping.unchecked_by_key(db)
+	frozen = freezer.freezer_words(db)
 	for key, line in lines.items():
 		line["pantry"] = pantry.matches(line["name"], staples)
 		line["on_list"] = key in listed
+		line["freezer"] = freezer.matches(line["name"], frozen)
 	return list(lines.values())

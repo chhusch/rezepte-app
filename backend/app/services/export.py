@@ -11,11 +11,11 @@ from sqlalchemy.orm import Session
 from app import storage
 from app.models import Photo, Recipe
 from app.routers.recipes import to_out
-from app.schemas import CategoryOut, TagOut
-from app.services import taxonomy
+from app.schemas import CategoryOut, FreezerItemOut, PlanDayOut, TagOut
+from app.services import freezer, plan, taxonomy
 from app.services.recipes import LOAD_ALL
 
-EXPORT_VERSION = 1
+EXPORT_VERSION = 2
 JSON_NAME = "recipes.json"
 PHOTO_DIR = "photos/"
 
@@ -35,6 +35,11 @@ def export_json(db: Session, recipes: list[Recipe]) -> dict:
 			 for t in taxonomy.list_tags(db)],
 		"recipes": [to_out(r).model_dump(mode="json")
 			    for r in recipes],
+		"plan": [PlanDayOut.model_validate(d).model_dump(mode="json")
+			 for d in plan.all_days(db)],
+		"freezer": [FreezerItemOut.model_validate(i)
+			    .model_dump(mode="json")
+			    for i in freezer.list_items(db)],
 	}
 
 
