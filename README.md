@@ -62,17 +62,186 @@ Baut die Images und startet im Hintergrund. App: `http://SERVER-IP:8080`
 (`HTTP_PORT` in `.env`). Beim ersten Öffnen Benutzername und
 Passwort festlegen; das ist der einzige Benutzer.
 
-## NPM
+## Zugriff von unterwegs
 
-Proxy Host: Scheme `http`, Server-IP, Port 8080, SSL mit «Force SSL».
+Eigener Proxmox-Container `zugang` mit WireGuard (wg-easy), NPM und
+ddclient. Von aussen offen ist nur UDP 51820; ohne WireGuard-Schlüssel
+antwortet er nicht. Die App ist nur im Heimnetz und im Tunnel
+erreichbar.
 
-Dann `COOKIE_SECURE=true` in `.env`:
+Beispielwerte unten: Domain `deinedomain.ch`, `zugang` auf
+`192.168.0.210`, App-Container auf `192.168.0.211`. Eigene Werte
+einsetzen; feste Adressen ausserhalb des DHCP-Bereichs des Routers.
+Eingerichteter Stand und Rückbau: `docs/ZUGANG.md`.
+
+### Infomaniak
+
+Im Manager der Domain:
+
+1. DynDNS `vpn.deinedomain.ch` anlegen; Benutzer und Passwort nur aus
+   Buchstaben und Ziffern, sonst antwortet Infomaniak mit 302.
+2. DNS-Eintrag A: `rezepte.deinedomain.ch` → `192.168.0.210`.
+3. API-Token mit `domain:read`, `domain:write`, `dns:read`,
+   `dns:write` (für Zertifikate; nur «domain» ergibt «Domain not
+   found»).
+
+### Proxmox-Host
+
+In der Konsole des Hosts, nicht in einem Container:
+
+```bash
+modprobe wireguard
+```
+
+Lädt WireGuard in den Kernel.
+
+```bash
+echo wireguard > /etc/modules-load.d/wireguard.conf
+```
+
+Lädt es auch nach jedem Neustart.
+
+«Create CT»: Hostname `zugang`, unprivilegiert, Vorlage Debian, 1 CPU,
+1 GB RAM, 8 GB Disk, IPv4 statisch `192.168.0.210/24`, Gateway = Router.
+Danach «Options», «Features»: `nesting` und `keyctl` ein. Starten.
+
+### Container zugang
+
+In der Konsole von `zugang`:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+```
+
+Installiert Docker.
+
+```bash
+mkdir -p /root/zugang/ddclient && cd /root/zugang
+```
+
+```bash
+cat > compose.yaml <<'EOF'
+name: zugang
+
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:15.5.0
+    restart: unless-stopped
+    environment:
+      INSECURE: "true"
+      DISABLE_IPV6: "true"
+    volumes:
+      - wireguard:/etc/wireguard
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+
+  npm:
+    image: jc21/nginx-proxy-manager:2.17.0
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - npm_data:/data
+      - npm_certs:/etc/letsencrypt
+
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:v4.0.0-ls238
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Zurich
+    volumes:
+      - ./ddclient:/config
+
+volumes:
+  wireguard:
+  npm_data:
+  npm_certs:
+EOF
+```
+
+```bash
+cat > ddclient/ddclient.conf <<'EOF'
+daemon=300
+ssl=yes
+usev4=webv4, webv4=ipify-ipv4
+protocol=infomaniak
+login=DYNDNS-BENUTZER
+password='DYNDNS-PASSWORT'
+vpn.deinedomain.ch
+EOF
+```
+
+Benutzer, Passwort und Name in `ddclient/ddclient.conf` anpassen:
+
+```bash
+nano ddclient/ddclient.conf
+```
+
+Ctrl+O speichert, Ctrl+X beendet.
+
+```bash
+chmod 600 ddclient/ddclient.conf && docker compose up -d
+```
+
+Schützt die Datei und startet die drei Dienste.
+
+```bash
+docker compose logs ddclient
+```
+
+Muss `SUCCESS` für `vpn.deinedomain.ch` zeigen.
+
+Update: Versionen in `compose.yaml` anpassen, dann:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+### Wingo
+
+In myWingo Port-Forwarding: UDP 51820 → `192.168.0.210`. Damit erhält
+der Anschluss auch eine öffentliche IPv4 (bis 20 Minuten). Sonst nichts
+freigeben.
+
+### WireGuard
+
+`http://192.168.0.210:51821`, nur im Heimnetz:
+
+1. Admin-Benutzer anlegen; Host `vpn.deinedomain.ch`, Port `51820`.
+2. «Admin», «Config»: Allowed IPs `192.168.0.210/32`, DNS `9.9.9.9`.
+   Durch den Tunnel geht nur der Verkehr zu `zugang`.
+3. Je Gerät einen Client anlegen, QR-Code anzeigen.
+
+Handy: App «WireGuard» (App Store, Play Store), «+», QR-Code scannen.
+iPhone: im Tunnel «Bei Bedarf aktivieren» für Mobilfunk und fremde WLANs.
+
+### NPM
+
+`http://192.168.0.210:81`, nur im Heimnetz. Beim ersten Öffnen
+Admin-Benutzer anlegen.
+
+1. «SSL Certificates», «Add», Let's Encrypt: Domain
+   `rezepte.deinedomain.ch`, «DNS Challenge», Anbieter Infomaniak,
+   Inhalt `dns_infomaniak_token = API-TOKEN`.
+2. «Proxy Hosts», «Add»: Domain `rezepte.deinedomain.ch`, Scheme
+   `http`, `192.168.0.211`, Port 8080; SSL: das Zertifikat, «Force SSL».
+
+Dann `COOKIE_SECURE=true` in `.env` der App:
 
 ```bash
 docker compose up -d api
 ```
 
-Startet `api` neu. Anmeldung danach nur noch über HTTPS.
+Startet `api` neu. Anmeldung danach nur noch über HTTPS:
+`https://rezepte.deinedomain.ch`.
 
 ## Benutzer
 
@@ -255,6 +424,11 @@ cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 - Intern ja, NPM nein: Proxy Host prüfen (`http`, IP, 8080);
   `docker compose logs web`.
 - Anmeldung intern geht nicht: `COOKIE_SECURE=true`, nur über HTTPS.
+- Unterwegs kein Handshake in der WireGuard-App: in `zugang`
+  `docker compose logs ddclient`; Port-Forwarding in myWingo prüfen.
+- `rezepte.deinedomain.ch` nur im Heim-WLAN nicht gefunden: Router
+  blockiert Namen auf interne Adressen (DNS-Rebind-Schutz); Tunnel
+  auch zu Hause einschalten.
 - Container `restarting`/`exited`: `docker compose logs NAME`.
 - Passwort vergessen: `set-password`.
 - DB-Passwort ändern: zuerst in der DB,
