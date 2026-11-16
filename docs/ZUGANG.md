@@ -51,14 +51,14 @@ Passwort-Manager.
 | myWingo | Port-Forwarding UDP 51820 und TCP 443 → `zugang` |
 | wg-easy | Admin-Benutzer; Allowed IPs `192.168.0.210/32`; DNS `9.9.9.9` |
 | NPM | Admin-Benutzer; Zertifikat und Proxy Host `rezepte.hus-digital.ch` (16.11.) |
-| rezepte | `.env`: `TRUSTED_PROXY=192.168.0.210/32` |
+| rezepte | `.env`: `TRUSTED_PROXY=192.168.0.210/32`, `COOKIE_SECURE=true` |
 | Handy | App WireGuard mit Tunnel aus dem QR-Code |
 
 ## Offen
 
 - [x] Test unterwegs: App mit Schloss (Mobilfunk, ohne Tunnel)
 - [ ] Test im Heim-WLAN ohne Tunnel (NAT-Loopback)
-- [ ] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
+- [x] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
 - [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
 - [ ] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
 - [ ] Alten Infomaniak-Token (nur «domain») löschen
