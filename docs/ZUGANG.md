@@ -49,6 +49,7 @@ Passwort-Manager.
 | Proxmox | Container `rezepte`: Adresse fest `192.168.0.211` statt DHCP |
 | zugang | Docker; Ordner `/root/zugang` mit wg-easy, NPM, ddclient |
 | myWingo | Port-Forwarding UDP 51820 und TCP 443 → `zugang` |
+| myWingo | Statische IP: `192.168.0.41` → MAC `1C:69:7A:6E:BE:1B` (Host) |
 | wg-easy | Admin-Benutzer; Allowed IPs `192.168.0.210/32`; DNS `9.9.9.9` |
 | NPM | Admin-Benutzer; Zertifikat und Proxy Host `rezepte.hus-digital.ch` (16.11.) |
 | rezepte | `.env`: `TRUSTED_PROXY=192.168.0.210/32`, `COOKIE_SECURE=true` |
@@ -63,8 +64,8 @@ Passwort-Manager.
 - [ ] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
 - [x] Alten Infomaniak-Token (nur «domain») löschen
 - [x] Öffentlich schalten: README, «Öffentlich erreichbar»
-- [ ] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
-      (`.10`–`.200`); später ausserhalb legen
+- [x] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
+      (`.10`–`.200`); in myWingo fest reserviert
 
 ## Rückgängig machen
 
