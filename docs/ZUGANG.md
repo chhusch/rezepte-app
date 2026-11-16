@@ -60,7 +60,6 @@ Passwort-Manager.
 - [x] Test unterwegs: App mit Schloss (Mobilfunk, ohne Tunnel)
 - [x] Test im Heim-WLAN ohne Tunnel (NAT-Loopback)
 - [x] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
-- [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
 - [x] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
 - [x] Alten Infomaniak-Token (nur «domain») löschen
 - [x] Öffentlich schalten: README, «Öffentlich erreichbar»
