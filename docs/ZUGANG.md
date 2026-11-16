@@ -57,7 +57,7 @@ Passwort-Manager.
 ## Offen
 
 - [x] Test unterwegs: App mit Schloss (Mobilfunk, ohne Tunnel)
-- [ ] Test im Heim-WLAN ohne Tunnel (NAT-Loopback)
+- [x] Test im Heim-WLAN ohne Tunnel (NAT-Loopback)
 - [x] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
 - [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
 - [ ] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
