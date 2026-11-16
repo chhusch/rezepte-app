@@ -133,7 +133,7 @@ function svg(tag, attrs)
 	return el;
 }
 
-function home_icon()
+export function home_icon()
 {
 	const el = svg("svg", { viewBox: "0 0 32 32", fill: "none",
 				stroke: "currentColor", "stroke-width": 2.2,

@@ -25,7 +25,7 @@ import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
 	split_csv, empty_input, recipe_to_input, recipe_form, copy_link,
-	send_link, fmt_date,
+	send_link, fmt_date, home_icon,
 } from "./form.js";
 import {
 	can_scale, scaled_ingredients, servings_stepper, load_servings,
@@ -431,13 +431,20 @@ function category_meta(r, tag, cls)
 	return h(tag, { class: cls }, cat, cat && tags ? " · " : null, tags);
 }
 
+/* Same size with or without photo, so every title starts alike. */
+function thumb(r)
+{
+	if (r.thumb_url)
+		return h("img", { class: "thumb", alt: "", src: r.thumb_url,
+				  loading: "lazy" });
+	return h("div", { class: "thumb thumb-empty" }, home_icon());
+}
+
 function recipe_card(r)
 {
 	return h("li", {},
 		h("a", { class: "card", href: "#/recipe/" + r.id },
-			r.thumb_url ? h("img", { class: "thumb", alt: "",
-						 src: r.thumb_url,
-						 loading: "lazy" }) : null,
+			thumb(r),
 			h("div", { class: "body" },
 				h("div", { class: "title" },
 					r.favorite ? star() : null,

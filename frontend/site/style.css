@@ -423,7 +423,7 @@ fieldset {
 .card {
 	display: flex;
 	gap: 12px;
-	align-items: center;
+	align-items: flex-start;
 	width: 100%;
 	text-align: left;
 	padding: 12px 16px;
@@ -464,6 +464,19 @@ fieldset {
 	object-fit: cover;
 	border-radius: 8px;
 	background: var(--line);
+}
+
+.card .thumb-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--fg-muted);
+}
+
+.card .thumb-empty svg {
+	width: 30px;
+	height: 30px;
+	opacity: 0.6;
 }
 
 /* Overflow menu */
