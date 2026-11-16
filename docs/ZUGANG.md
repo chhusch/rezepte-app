@@ -61,7 +61,7 @@ Passwort-Manager.
 - [x] Test im Heim-WLAN ohne Tunnel (NAT-Loopback)
 - [x] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
 - [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
-- [ ] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
+- [x] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
 - [x] Alten Infomaniak-Token (nur «domain») löschen
 - [x] Öffentlich schalten: README, «Öffentlich erreichbar»
 - [x] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
