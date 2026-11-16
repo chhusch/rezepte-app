@@ -1421,6 +1421,15 @@ button[aria-disabled="true"] {
 	margin: 10vh auto 0;
 }
 
+/* Account */
+.account {
+	max-width: 480px;
+}
+
+.account section {
+	margin-top: calc(2 * var(--gap));
+}
+
 /* Toast */
 #toast {
 	position: fixed;

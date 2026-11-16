@@ -4,7 +4,8 @@
  * Routes: #/login, #/ (list), #/recipe/ID, #/new, #/edit/ID,
  * #/cook/ID (cook.js), #/import (import.js), #/shopping and
  * #/pantry (shopping.js), #/categories (categories.js), #/plan and
- * #/plan/shopping (plan.js), #/freezer (freezer.js), #/s/TOKEN
+ * #/plan/shopping (plan.js), #/freezer (freezer.js), #/konto
+ * (account.js), #/s/TOKEN
  * (share.js, public). All user text is rendered through h() /
  * textContent, never innerHTML. DOM helpers and the recipe form live
  * in form.js.
@@ -17,6 +18,7 @@ import { view_shopping, view_pantry } from "./shopping.js";
 import { view_categories } from "./categories.js";
 import { view_plan, view_plan_shopping } from "./plan.js";
 import { view_freezer } from "./freezer.js";
+import { view_account, MIN_PASSWORD_LEN } from "./account.js";
 import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
@@ -67,6 +69,7 @@ const ROUTES = [
 	[/^#\/categories$/, view_categories],
 	[/^#\/plan$/, view_plan],
 	[/^#\/freezer$/, view_freezer],
+	[/^#\/konto$/, () => view_account(logged_out)],
 	[/^#\/plan\/shopping\?(.*)$/, view_plan_shopping],
 	[/^#\/s\/([A-Za-z0-9_-]+)$/, view_shared_route],
 ];
@@ -250,8 +253,6 @@ function view_error(e)
 /* Login                                                               */
 /* ------------------------------------------------------------------ */
 
-const MIN_PASSWORD_LEN = 8;
-
 function login_form(title, submit_label, fields, on_submit)
 {
 	const btn = h("button", { type: "submit", class: "btn-primary" },
@@ -296,7 +297,8 @@ function view_setup()
 	const again = password_input("again", "new-password");
 	return login_form("Benutzer anlegen", "Anlegen", [
 		field("Benutzername", user),
-		field("Passwort (mind. 8 Zeichen)", pass),
+		field("Passwort (mind. " + MIN_PASSWORD_LEN + " Zeichen)",
+		      pass),
 		field("Passwort wiederholen", again),
 	], async () => {
 		if (pass.value !== again.value)
@@ -323,6 +325,12 @@ async function view_login()
 	], () => API.login(user.value.trim(), pass.value));
 }
 
+function logged_out()
+{
+	state.user = null;
+	navigate("#/login");
+}
+
 async function logout()
 {
 	try {
@@ -330,8 +338,7 @@ async function logout()
 	} catch (e) {
 		/* Session may already be gone; log out locally anyway. */
 	}
-	state.user = null;
-	navigate("#/login");
+	logged_out();
 }
 
 /* ------------------------------------------------------------------ */
@@ -504,6 +511,7 @@ async function view_list(zutaten)
 			     h("a", { href: "#/freezer" }, "Gefriertruhe"),
 			     h("a", { href: "#/shopping" }, "Einkaufsliste"),
 			     h("a", { href: "#/categories" }, "Kategorien"),
+			     h("a", { href: "#/konto" }, "Konto"),
 			     h("a", { href: API.export_url(),
 				      download: "rezepte.zip" }, "Export"),
 			     h("button", { type: "button", onclick: logout },

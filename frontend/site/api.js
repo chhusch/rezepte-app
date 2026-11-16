@@ -111,6 +111,16 @@ export function logout()
 	return api("POST", "/auth/logout");
 }
 
+export function change_password(current, password)
+{
+	return api("POST", "/auth/password", { current, new: password });
+}
+
+export function logout_all()
+{
+	return api("POST", "/auth/logout-all");
+}
+
 export function me()
 {
 	return api("GET", "/auth/me");
