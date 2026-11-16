@@ -398,6 +398,59 @@ docker compose up -d
 
 Startet; mit Name dahinter nur diesen Container.
 
+## Updates
+
+Einmal im Monat, in dieser Reihenfolge. Vorher in Proxmox «Options»
+beider Container: «Start at boot» = Yes.
+
+1. **Snapshots:** Proxmox, Container `zugang`, «Snapshots», «Take
+   Snapshot», Name `vor-update`; ebenso `rezepte`. Geht etwas schief:
+   Snapshot wählen, «Rollback».
+2. **Proxmox-Host:** Host wählen, «Updates», «Refresh», dann
+   «Upgrade». Steht danach «reboot required», Host neu starten.
+3. **Debian**, in der Konsole von `zugang` und von `rezepte`:
+
+   ```bash
+   apt update && apt full-upgrade -y
+   ```
+
+   Holt die Paketlisten und installiert alle Aktualisierungen.
+4. **zugang:** Neueste Versionen nachschlagen:
+   [NPM](https://github.com/NginxProxyManager/nginx-proxy-manager/releases),
+   [wg-easy](https://github.com/wg-easy/wg-easy/releases),
+   [ddclient](https://github.com/linuxserver/docker-ddclient/releases).
+   Bei neuer erster Zahl (z. B. 15 → 16) zuerst die Release Notes
+   lesen. Versionen eintragen:
+
+   ```bash
+   cd /root/zugang && nano compose.yaml
+   ```
+
+   ```bash
+   docker compose pull && docker compose up -d && docker image prune -f
+   ```
+
+   Lädt die neuen Images, startet die Dienste damit neu und löscht
+   die alten.
+5. **App**, in der Konsole von `rezepte`:
+
+   ```bash
+   cd /root/rezepte-app && git pull && docker compose build --pull
+   ```
+
+   Holt den neuen Code und baut die Images mit aktuellen Grundlagen
+   (Python, Caddy, PostgreSQL).
+
+   ```bash
+   docker compose up -d && docker image prune -f
+   ```
+
+   Startet die neuen Container und löscht die alten Images.
+6. **Test:** `https://rezepte.deinedomain.ch` öffnen, anmelden;
+   WireGuard-Tunnel einmal verbinden.
+7. **Nach einer Woche** ohne Probleme: beide Snapshots löschen
+   («Remove»). Sie belegen sonst Platz.
+
 ## Backup
 
 Täglich um `BACKUP_HOUR` Uhr (3, Zeitzone `TZ`) nach `./backups`:
