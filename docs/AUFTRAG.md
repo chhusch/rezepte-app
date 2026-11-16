@@ -1,7 +1,7 @@
 # Rezepte-App – Projektauftrag
 
 ## Kontext
-Private Rezeptsammlung für eine Person, bedient hauptsächlich auf dem
+Private Rezeptsammlung für einen Haushalt, bedient hauptsächlich auf dem
 Handy (iPhone und Android) in der Küche. Ich bin kein Profi-Entwickler
 und habe wenig Docker-Erfahrung.
 Du baust eine solide, professionelle Lösung, keine Einsteigervariante.
@@ -39,9 +39,10 @@ Regeln:
   Auto-Reload, DB-Port auf localhost, API-Doku unter /api/docs.
 - Fotos liegen in einem Docker-Volume. Der Dateizugriff ist in einem
   einzigen Modul gekapselt (storage.py), damit später S3 möglich ist.
-- Login: ein Benutzer, Passwort mit Argon2 gehasht, Sitzung als
-  zufälliger Token in HttpOnly-Cookie, Token-Hash in der DB.
-  Benutzer wird per CLI-Befehl im Container angelegt.
+- Login: Benutzer eines Haushalts mit gleichen Rechten und gemeinsamen
+  Daten, Passwort mit Argon2 gehasht, Sitzung als zufälliger Token in
+  HttpOnly-Cookie, Token-Hash in der DB. Erster Benutzer beim ersten
+  Öffnen, weitere per Einladungslink (Phase D).
 - Geschäftslogik liegt in app/services/, unabhängig von HTTP.
   Router in app/routers/ sind dünn. Grund: Oberfläche und Hosting
   sollen austauschbar bleiben, und ein zweites Projekt (zeitgesteuerte
@@ -100,7 +101,8 @@ Nährwerte pro Portion.
 
 ## Bewusst nicht gebaut
 Vorratsverwaltung mit Ablaufdaten, Community, Blog-Feeds, Sortierung
-der Einkaufsliste nach Ladenabteilung, Mehrbenutzer-Verwaltung.
+der Einkaufsliste nach Ladenabteilung, mehrere Haushalte in einer
+Installation.
 
 ## Nicht-funktionale Anforderungen
 - Gut bedienbar in der Küche: grosse Schaltflächen, schnell, wenig Tippen.

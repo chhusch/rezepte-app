@@ -60,7 +60,7 @@ docker compose up -d --build
 
 Baut die Images und startet im Hintergrund. App: `http://SERVER-IP:8080`
 (`HTTP_PORT` in `.env`). Beim ersten Öffnen Benutzername und
-Passwort festlegen; das ist der einzige Benutzer.
+Passwort festlegen; weitere Personen per Einladung (siehe «Benutzer»).
 
 ## Zugriff von unterwegs
 
@@ -283,7 +283,15 @@ Zurück zum Tunnel: Weiterleitung 443 löschen, CNAME durch A `rezepte`
 
 ## Benutzer
 
-Angelegt beim ersten Öffnen im Browser, nur aus dem Heimnetz.
+Erster Benutzer: beim ersten Öffnen im Browser, nur aus dem Heimnetz.
+Alle weiteren: Menü, «Konto», «Einladen». Der Link gilt einmal und 7
+Tage; damit wählt die Person Name und Passwort. Alle Benutzer sehen
+dieselben Daten und haben dieselben Rechte; das eigene Konto lässt
+sich nicht entfernen.
+
+Notizen und Kochlog zeigen links einen Streifen in der Farbe der
+Person, die sie geschrieben hat; Farbe unter «Konto».
+
 Menü, «Konto»: Passwort ändern, alle Geräte abmelden.
 
 Nach 5 Fehlversuchen innert 15 Minuten ist die Anmeldung von dieser

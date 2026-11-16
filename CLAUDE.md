@@ -5,7 +5,7 @@ Projektauftrag steht in `docs/AUFTRAG.md`, der Stand je Phase in
 `docs/PLAN.md`.
 
 ## Kontext
-Rezeptsammlung für eine Person, Handy in der Küche. Der Betreiber
+Rezeptsammlung für einen Haushalt, Handy in der Küche. Der Betreiber
 hat wenig Docker-Erfahrung.
 
 ## Technologie (fest vorgegeben)
@@ -27,9 +27,9 @@ hat wenig Docker-Erfahrung.
 - Geschäftslogik in `backend/app/services/`, Router dünn.
 - Jede Datenmodell-Änderung als Alembic-Migration, nie `create_all`.
 - Keine Abhängigkeiten ohne gepinnte Version, keine Alpha-Versionen.
-- Alle Endpunkte ausser Login, Ersteinrichtung, Health und
-  Teilen-Links erfordern Login. Der Benutzer entsteht beim ersten
-  Öffnen im Browser, nicht per CLI.
+- Alle Endpunkte ausser Login, Ersteinrichtung, Einladung annehmen,
+  Health und Teilen-Links erfordern Login. Der erste Benutzer entsteht
+  beim ersten Öffnen im Browser, weitere per Einladung, nicht per CLI.
 
 ## Sprache
 - Code, Kommentare, Commit-Texte: Englisch.

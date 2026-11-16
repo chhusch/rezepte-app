@@ -417,3 +417,28 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
 | POST | /api/auth/logout-all | alle Sitzungen beenden |
 
 - `#/konto` (`account.js`): Passwort ändern, überall abmelden.
+
+## Phase D 16.11.: Haushalt
+- Alle Benutzer sehen dieselben Daten, gleiche Rechte; das eigene
+  Konto lässt sich nicht entfernen.
+- Migration 0006: `users.color` (`sea`, `razz`, `mustard`, `coffee`;
+  neue Konten erhalten die erste freie), `notes.user_id` und
+  `cook_log.user_id` (SET NULL), Tabelle `invites` (Token-Hash,
+  erstellt von, gültig bis). Bestehende Einträge gehören dem bisher
+  einzigen Benutzer.
+- Einladung: einmal gültig, 7 Tage; unbekannte Tokens zählen als
+  Fehlversuch (Login-Sperre).
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| GET | /api/users | Benutzer, `me` markiert |
+| PUT | /api/users/me | `{color}` |
+| DELETE | /api/users/{id} | anderen Benutzer entfernen |
+| GET/POST | /api/invites | offene / neue Einladung (Token nur einmal) |
+| DELETE | /api/invites/{id} | zurückziehen |
+| GET/POST | /api/auth/invite/{token} | öffentlich: prüfen / Konto anlegen |
+
+- Notizen und Kochlog liefern `author` `{username, color}`; Oberfläche:
+  feiner Streifen links in der Farbe.
+- `#/konto`: Haushalt, Farbe, Einladungen; `#/einladung/TOKEN`
+  öffentlich.
