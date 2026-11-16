@@ -416,13 +416,16 @@ beider Container: «Start at boot» = Yes.
    Snapshot wählen, «Rollback».
 2. **Proxmox-Host:** Host wählen, «Updates», «Refresh», dann
    «Upgrade». Steht danach «reboot required», Host neu starten.
-3. **Debian**, in der Konsole von `zugang` und von `rezepte`:
+3. **Betriebssystem der Container** (`zugang` Debian, `rezepte`
+   Ubuntu), in beiden Konsolen:
 
    ```bash
    apt update && apt full-upgrade -y
    ```
 
    Holt die Paketlisten und installiert alle Aktualisierungen.
+   «deferred due to phasing» bei Ubuntu: Update wird gestaffelt
+   verteilt, kommt beim nächsten Mal.
 4. **zugang:** Neueste Versionen nachschlagen:
    [NPM](https://github.com/NginxProxyManager/nginx-proxy-manager/releases),
    [wg-easy](https://github.com/wg-easy/wg-easy/releases),

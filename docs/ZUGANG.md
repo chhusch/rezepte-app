@@ -66,6 +66,23 @@ Passwort-Manager.
 - [x] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
       (`.10`–`.200`); in myWingo fest reserviert
 
+## Update 16.11.2026 (unterbrochen)
+
+Nach README «Updates»:
+
+- [x] 0: «Start at boot» bei `zugang` und `rezepte`
+- [x] 1: Snapshots `vor-update` von `zugang` und `rezepte`
+- [x] 2: Proxmox-Host aktualisiert, Kernel `7.0.2-6-pve`, kein
+      Neustart nötig
+- [ ] 3: `rezepte` (Ubuntu 26.04): `apt full-upgrade -y` nochmals;
+      offen `distro-info`, `python3-distro-info` (evtl. gestaffelt)
+- [ ] 3: `zugang`: `apt update && apt list --upgradable` prüfen
+- [ ] 3: In beiden `docker compose ps`: alle Container laufen
+- [ ] 4: `zugang`: Versionen NPM, wg-easy, ddclient
+- [ ] 5: App: `git pull`, `docker compose build --pull`, `up -d`
+- [ ] 6: Test App und Tunnel
+- [ ] 7: Snapshots `vor-update` nach einer Woche löschen
+
 ## Rückgängig machen
 
 In dieser Reihenfolge; danach ist der Zustand wie vorher.
