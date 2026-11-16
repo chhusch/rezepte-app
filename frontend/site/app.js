@@ -406,20 +406,6 @@ function filter_params()
 	};
 }
 
-function star()
-{
-	return h("span", { class: "star", "aria-label": "Favorit" }, "★");
-}
-
-function cooked_line(r)
-{
-	if (!r.cooked_count)
-		return null;
-	const last = r.last_cooked ? "zuletzt " + fmt_date(r.last_cooked) : "";
-	return h("div", { class: "meta" },
-		join_present([r.cooked_count + "× gekocht", last], ", "));
-}
-
 /* Category as a label, then the tags. */
 function category_meta(r, tag, cls)
 {
@@ -446,11 +432,9 @@ function recipe_card(r)
 		h("a", { class: "card", href: "#/recipe/" + r.id },
 			thumb(r),
 			h("div", { class: "body" },
-				h("div", { class: "title" },
-					r.favorite ? star() : null,
-					h("span", {}, r.title)),
-				category_meta(r, "div", "meta"),
-				cooked_line(r))));
+				h("div", { class: "title" }, r.title),
+				r.category ? h("span", { class: "cat" },
+					       r.category.name) : null)));
 }
 
 async function fill_list(ul)

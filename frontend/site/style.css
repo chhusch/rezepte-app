@@ -438,23 +438,23 @@ fieldset {
 .card .title {
 	font-size: 1.1rem;
 	font-weight: 600;
-	display: flex;
-	gap: 8px;
-	align-items: baseline;
+	overflow-wrap: anywhere;
 }
 
-.card .title .star {
-	color: var(--fav);
-}
-
-.card .meta {
-	color: var(--fg-muted);
-	font-size: 0.9rem;
-}
-
+/* Title on top, category at the bottom right, level with the photo. */
 .card .body {
 	flex: 1 1 auto;
 	min-width: 0;
+	min-height: 64px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.card .cat {
+	margin-top: auto;
+	align-self: flex-end;
+	font-size: 0.85rem;
 }
 
 .card .thumb {
