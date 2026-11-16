@@ -27,4 +27,6 @@ USER app
 EXPOSE 8000
 
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Only Caddy reaches port 8000, so its X-Forwarded-For is trusted.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", \
+     "--proxy-headers", "--forwarded-allow-ips", "*"]

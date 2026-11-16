@@ -13,6 +13,7 @@ services:
     logging: *logging
     environment:
       TZ: "${TZ:-Europe/Zurich}"
+      TRUSTED_PROXY: "${TRUSTED_PROXY:-private_ranges}"
     ports:
       - "${HTTP_PORT:-8080}:80"
     depends_on:

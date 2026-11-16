@@ -11,6 +11,9 @@ services:
       - "0.0.0.0"
       - --port
       - "8000"
+      - --proxy-headers
+      - --forwarded-allow-ips
+      - "*"
       - --reload
     environment:
       API_DOCS: "true"

@@ -1,6 +1,19 @@
 # Plain HTTP; TLS is terminated by the external reverse proxy.
 {
 	auto_https off
+	servers {
+		# Read the visitor address from X-Forwarded-For only behind
+		# these proxies, right to left, so a client cannot forge it.
+		trusted_proxies static {$TRUSTED_PROXY:private_ranges}
+		trusted_proxies_strict
+	}
+}
+
+# The API trusts this header (uvicorn --proxy-headers): one address.
+(to_api) {
+	reverse_proxy api:8000 {
+		header_up X-Forwarded-For {client_ip}
+	}
 }
 
 :80 {
@@ -20,16 +33,16 @@
 		request_body {
 			max_size 20MB
 		}
-		reverse_proxy api:8000
+		import to_api
 	}
 	handle /media/* {
-		reverse_proxy api:8000
+		import to_api
 	}
 	# Public photos of shared recipes; the bare /share (share target)
 	# stays the app shell below.
 	@share_photos path /share/*/photos/*
 	handle @share_photos {
-		reverse_proxy api:8000
+		import to_api
 	}
 
 	# Static files with SPA fallback for non-file routes.
