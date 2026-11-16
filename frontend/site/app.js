@@ -5,7 +5,7 @@
  * #/cook/ID (cook.js), #/import (import.js), #/shopping and
  * #/pantry (shopping.js), #/categories (categories.js), #/plan and
  * #/plan/shopping (plan.js), #/freezer (freezer.js), #/konto
- * (account.js), #/s/TOKEN
+ * (account.js), #/einladung/TOKEN (public), #/s/TOKEN
  * (share.js, public). All user text is rendered through h() /
  * textContent, never innerHTML. DOM helpers and the recipe form live
  * in form.js.
@@ -18,11 +18,14 @@ import { view_shopping, view_pantry } from "./shopping.js";
 import { view_categories } from "./categories.js";
 import { view_plan, view_plan_shopping } from "./plan.js";
 import { view_freezer } from "./freezer.js";
-import { view_account, MIN_PASSWORD_LEN } from "./account.js";
+import {
+	view_account, MIN_PASSWORD_LEN,
+} from "./account.js";
 import { view_shared } from "./share.js";
 import {
 	h, toast, error_msg, field, back_button, topbar, str, fmt_amount,
-	split_csv, empty_input, recipe_to_input, recipe_form,
+	split_csv, empty_input, recipe_to_input, recipe_form, copy_link,
+	send_link, fmt_date,
 } from "./form.js";
 import {
 	can_scale, scaled_ingredients, servings_stepper, load_servings,
@@ -70,12 +73,13 @@ const ROUTES = [
 	[/^#\/plan$/, view_plan],
 	[/^#\/freezer$/, view_freezer],
 	[/^#\/konto$/, () => view_account(logged_out)],
+	[/^#\/einladung\/([A-Za-z0-9_-]+)$/, view_invite],
 	[/^#\/plan\/shopping\?(.*)$/, view_plan_shopping],
 	[/^#\/s\/([A-Za-z0-9_-]+)$/, view_shared_route],
 ];
 
 /* Views that work without a session. */
-const PUBLIC_VIEWS = [view_login, view_shared_route];
+const PUBLIC_VIEWS = [view_login, view_invite, view_shared_route];
 
 let render_seq = 0;
 
@@ -129,13 +133,6 @@ function menu(...items)
 function fmt_minutes(n)
 {
 	return n === null || n === undefined ? "" : n + " Min.";
-}
-
-/* "2026-10-29" or an ISO datetime -> "29.10.2026" */
-function fmt_date(s)
-{
-	const m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-	return m ? m[3] + "." + m[2] + "." + m[1] : str(s);
 }
 
 function pad2(n)
@@ -304,6 +301,33 @@ function view_setup()
 		if (pass.value !== again.value)
 			throw new Error("Passwörter stimmen nicht überein");
 		await API.setup(user.value.trim(), pass.value);
+	});
+}
+
+/* Invite link: choose name and password, then logged in. */
+async function view_invite(token)
+{
+	try {
+		await API.invite_state(token);
+	} catch (e) {
+		return h("main", { class: "login" },
+			h("h1", {}, "Einladung"),
+			h("p", {}, error_msg(e)));
+	}
+	const user = name_input("username");
+	const pass = password_input("password", "new-password");
+	pass.minLength = MIN_PASSWORD_LEN;
+	const again = password_input("again", "new-password");
+	return login_form("Willkommen", "Konto anlegen", [
+		field("Benutzername", user),
+		field("Passwort (mind. " + MIN_PASSWORD_LEN + " Zeichen)",
+		      pass),
+		field("Passwort wiederholen", again),
+	], async () => {
+		if (pass.value !== again.value)
+			throw new Error("Passwörter stimmen nicht überein");
+		await API.accept_invite(token, user.value.trim(),
+					pass.value);
 	});
 }
 
@@ -760,9 +784,16 @@ function delete_button(label, on_click)
 			     "aria-label": label, onclick: on_click }, "✕");
 }
 
+/* Thin stripe in the author's color; name on long press / hover. */
+function by_author(a)
+{
+	return a ? { class: "entry by by-" + a.color, title: a.username }
+		 : { class: "entry by" };
+}
+
 function cooklog_item(id, c)
 {
-	return h("li", { class: "entry" },
+	return h("li", by_author(c.author),
 		h("div", { class: "entry-head" },
 			h("span", { class: "date" }, fmt_date(c.cooked_on)),
 			c.rating ? h("span", { class: "rating" },
@@ -849,7 +880,7 @@ function cooklog_section(r, open_form)
 
 function note_item(id, n)
 {
-	return h("li", { class: "entry" },
+	return h("li", by_author(n.author),
 		h("div", { class: "entry-head" },
 			h("span", { class: "date" }, fmt_date(n.created_at)),
 			delete_button("Notiz löschen", () => {
@@ -933,28 +964,6 @@ function shopping_button(r)
 function share_url(s)
 {
 	return location.origin + s.path;
-}
-
-async function copy_link(url)
-{
-	try {
-		await navigator.clipboard.writeText(url);
-		toast("Link kopiert", false);
-	} catch (e) {
-		toast(url, false);
-	}
-}
-
-/* System share sheet when there is one, else the clipboard. */
-async function send_link(url)
-{
-	if (!navigator.share)
-		return copy_link(url);
-	try {
-		await navigator.share({ url: url });
-	} catch (e) {
-		/* cancelled */
-	}
 }
 
 /*

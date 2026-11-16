@@ -12,7 +12,8 @@ const API_BASE = "/api";
 const LOGIN_PATH = "/auth/login";
 /* Paths that work without a session: a 401 there is not a logout. */
 const SETUP_PATH = "/auth/setup";
-const PUBLIC_PREFIXES = [LOGIN_PATH, SETUP_PATH, "/share/"];
+const INVITE_PATH = "/auth/invite/";
+const PUBLIC_PREFIXES = [LOGIN_PATH, SETUP_PATH, INVITE_PATH, "/share/"];
 
 export const UNAUTHORIZED_EVENT = "api:unauthorized";
 
@@ -119,6 +120,47 @@ export function change_password(current, password)
 export function logout_all()
 {
 	return api("POST", "/auth/logout-all");
+}
+
+export function invite_state(token)
+{
+	return api("GET", INVITE_PATH + encodeURIComponent(token));
+}
+
+export function accept_invite(token, username, password)
+{
+	return api("POST", INVITE_PATH + encodeURIComponent(token),
+		   { username, password });
+}
+
+export function list_users()
+{
+	return api("GET", "/users");
+}
+
+export function set_color(color)
+{
+	return api("PUT", "/users/me", { color });
+}
+
+export function remove_user(id)
+{
+	return api("DELETE", "/users/" + encodeURIComponent(id));
+}
+
+export function list_invites()
+{
+	return api("GET", "/invites");
+}
+
+export function create_invite()
+{
+	return api("POST", "/invites");
+}
+
+export function delete_invite(id)
+{
+	return api("DELETE", "/invites/" + encodeURIComponent(id));
 }
 
 export function me()

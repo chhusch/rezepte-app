@@ -85,6 +85,35 @@ export function error_msg(e)
 	return e && e.message ? e.message : "Unbekannter Fehler";
 }
 
+export async function copy_link(url)
+{
+	try {
+		await navigator.clipboard.writeText(url);
+		toast("Link kopiert", false);
+	} catch (e) {
+		toast(url, false);
+	}
+}
+
+/* System share sheet when there is one, else the clipboard. */
+export async function send_link(url)
+{
+	if (!navigator.share)
+		return copy_link(url);
+	try {
+		await navigator.share({ url: url });
+	} catch (e) {
+		/* cancelled */
+	}
+}
+
+/* "2026-10-29" or an ISO datetime -> "29.10.2026" */
+export function fmt_date(s)
+{
+	const m = String(s || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+	return m ? m[3] + "." + m[2] + "." + m[1] : str(s);
+}
+
 export function field(label, input)
 {
 	return h("label", {}, h("span", {}, label), input);

@@ -1290,26 +1290,24 @@ button[aria-disabled="true"] {
 	text-decoration: none;
 }
 
-.entries {
-	list-style: none;
+.plan-entries {
 	margin: 0 0 6px;
-	padding: 0;
 }
 
-.entries li {
+.plan-entries li {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	min-height: 40px;
 }
 
-.entries .text {
+.plan-entries .text {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow-wrap: anywhere;
 }
 
-.entries .note, .plan-src {
+.plan-entries .note, .plan-src {
 	color: var(--fg-muted);
 	font-size: 0.85rem;
 }
@@ -1425,6 +1423,79 @@ button[aria-disabled="true"] {
 .account {
 	max-width: 480px;
 }
+
+.members {
+	list-style: none;
+	margin: 0 0 var(--gap);
+	padding: 0;
+}
+
+.members li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: var(--touch);
+}
+
+.members li > :last-child {
+	margin-left: auto;
+}
+
+.members .muted {
+	color: var(--fg-muted);
+}
+
+.member-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--a);
+}
+
+.account .label {
+	margin: var(--gap) 0 6px;
+	color: var(--fg-muted);
+}
+
+.colors {
+	display: flex;
+	gap: 12px;
+}
+
+.color-btn {
+	flex: none;
+	width: 40px;
+	height: 40px;
+	min-width: 0;
+	min-height: 0;
+	padding: 0;
+	border-radius: 50%;
+	border: 3px solid transparent;
+	background: var(--a);
+	background-clip: padding-box;
+	box-shadow: 0 0 0 1px var(--line);
+}
+
+.color-btn[aria-pressed="true"] {
+	box-shadow: 0 0 0 2px var(--fg);
+}
+
+.invite-box input {
+	width: 100%;
+}
+
+/* Author of a note or cook log entry: thin stripe on the left. */
+.entry.by {
+	border-bottom: none;
+	border-left: 2px solid var(--a, transparent);
+	padding: 6px 0 6px 12px;
+	margin-bottom: 10px;
+}
+
+.by-sea { --a: var(--mark-sea); }
+.by-razz { --a: var(--mark-razz); }
+.by-mustard { --a: var(--mark-mustard); }
+.by-coffee { --a: var(--mark-coffee); }
 
 .account section {
 	margin-top: calc(2 * var(--gap));
