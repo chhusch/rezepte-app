@@ -61,7 +61,7 @@ Passwort-Manager.
 - [x] Schritt 10: `COOKIE_SECURE=true` in `.env` von `rezepte`
 - [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
 - [ ] In NPM doppeltes Zertifikat löschen (das mit «Not Used»)
-- [ ] Alten Infomaniak-Token (nur «domain») löschen
+- [x] Alten Infomaniak-Token (nur «domain») löschen
 - [x] Öffentlich schalten: README, «Öffentlich erreichbar»
 - [ ] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
       (`.10`–`.200`); später ausserhalb legen
