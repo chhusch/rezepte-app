@@ -260,7 +260,7 @@ function slot_block(d, slot, reload)
 				      onclick: () => add_sheet(d.day, key,
 							       label, reload) },
 			  "+")),
-		entries.length ? h("ul", { class: "entries" },
+		entries.length ? h("ul", { class: "entries plan-entries" },
 				   entries.map(e => entry_line(e, reload)))
 			: null);
 }
