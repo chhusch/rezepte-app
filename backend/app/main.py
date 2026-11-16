@@ -8,7 +8,7 @@ from app import storage
 from app.config import settings
 from app.routers import (auth, cooklog, export, favorite, freezer, health,
 			 importer, media, notes, pantry, photos, plan,
-			 recipes, share, shopping, taxonomy, todo)
+			 recipes, share, shopping, taxonomy, todo, users)
 
 API_PREFIX = "/api"
 DOCS_URL = API_PREFIX + "/docs"
@@ -48,5 +48,6 @@ api.include_router(freezer.router)
 api.include_router(share.router)
 api.include_router(share.public_router)
 api.include_router(todo.router)
+api.include_router(users.router)
 app.include_router(api)
 app.include_router(media.router)

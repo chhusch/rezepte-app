@@ -3,10 +3,12 @@
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 
-from app.models import CookLog
+from app.models import CookLog, User
 from app.schemas import COMMENT_MAX, CookLogIn
 from app.services import cooklog as service
+from tests.conftest import TEST_USER
 from tests.test_recipes import post_recipe
 
 ENTRY = {"cooked_on": "2026-10-28", "rating": 4, "comment": "Gut."}
@@ -21,7 +23,8 @@ def test_create_entry(auth_client):
 	resp = post_entry(auth_client, recipe["id"])
 	assert resp.status_code == 201, resp.text
 	body = resp.json()
-	assert set(body) == {"id", "cooked_on", "rating", "comment"}
+	assert set(body) == {"id", "cooked_on", "rating", "comment", "author"}
+	assert body["author"] == {"username": TEST_USER, "color": "sea"}
 	assert body["id"] > 0
 	assert body["cooked_on"] == "2026-10-28"
 	assert body["rating"] == 4
@@ -137,8 +140,10 @@ def test_recipe_lists_entries_newest_first(auth_client):
 def test_service_add_and_delete(db, auth_client):
 	recipe = post_recipe(auth_client)
 	data = CookLogIn(cooked_on=date(2026, 5, 1), rating=5)
-	assert service.add_entry(db, 9999, data) is None
-	entry = service.add_entry(db, recipe["id"], data)
+	user = db.scalars(select(User)).one()
+	assert service.add_entry(db, 9999, data, user) is None
+	entry = service.add_entry(db, recipe["id"], data, user)
+	assert entry.user_id == user.id
 	assert entry.id > 0
 	assert entry.cooked_on == date(2026, 5, 1)
 	assert entry.rating == 5 and entry.comment == ""

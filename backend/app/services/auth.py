@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session as DbSession
 from app import auth
 from app.models import Session, User
 
+COLORS = ("sea", "razz", "mustard", "coffee")
+
 
 def get_user(db: DbSession, username: str) -> User | None:
 	return db.scalar(select(User).where(User.username == username))
@@ -15,12 +17,19 @@ def has_users(db: DbSession) -> bool:
 	return db.scalar(select(User.id).limit(1)) is not None
 
 
+def free_color(db: DbSession) -> str:
+	"""First color nobody uses yet; all taken: the first again."""
+	used = set(db.scalars(select(User.color)))
+	return next((c for c in COLORS if c not in used), COLORS[0])
+
+
 def create_user(db: DbSession, username: str, password: str) -> User:
 	"""Raise ValueError if the username is already taken."""
 	if get_user(db, username) is not None:
 		raise ValueError("user exists: " + username)
 	user = User(username=username,
-		    password_hash=auth.hash_password(password))
+		    password_hash=auth.hash_password(password),
+		    color=free_color(db))
 	db.add(user)
 	db.commit()
 	db.refresh(user)

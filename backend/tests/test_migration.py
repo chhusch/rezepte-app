@@ -88,7 +88,7 @@ def test_upgrade_records_head_revision(migrated):
 	with migrated.connect() as conn:
 		rows = conn.execute(text("SELECT version_num FROM %s"
 					 % VERSION_TABLE)).all()
-	assert rows == [("0005",)]
+	assert rows == [("0006",)]
 
 
 @pytest.mark.parametrize("table", sorted(Base.metadata.tables))
@@ -125,9 +125,11 @@ def test_cascade_rules_as_planned(migrated):
 	for child in ("ingredients", "steps"):
 		assert fks[child] == [(("version_id",), "recipe_versions",
 				       ("id",), "CASCADE")]
-	for child in ("notes", "cook_log", "photos"):
-		assert fks[child] == [(("recipe_id",), "recipes", ("id",),
-				       "CASCADE")]
+	recipe_fk = (("recipe_id",), "recipes", ("id",), "CASCADE")
+	author_fk = (("user_id",), "users", ("id",), "SET NULL")
+	assert fks["photos"] == [recipe_fk]
+	for child in ("notes", "cook_log"):
+		assert sorted(fks[child]) == sorted([recipe_fk, author_fk])
 
 
 def test_migrated_schema_stores_enum_member_names(migrated):
@@ -164,3 +166,26 @@ def test_upgrade_is_idempotent_at_head(migrated):
 	before = app_tables(migrated)
 	command.upgrade(alembic_config(), "head")
 	assert app_tables(migrated) == before
+
+
+def test_household_assigns_old_entries_to_single_user(tmp_path,
+						       monkeypatch):
+	url = file_url(tmp_path / "old.db")
+	monkeypatch.setattr(settings, "database_url", url)
+	command.upgrade(alembic_config(), "0005")
+	engine = create_engine(url)
+	with engine.begin() as conn:
+		conn.execute(text("INSERT INTO users (username, password_hash)"
+				  " VALUES ('anna', 'x')"))
+		conn.execute(text("INSERT INTO notes (recipe_id, text)"
+				  " VALUES (1, 'alt')"))
+		conn.execute(text("INSERT INTO cook_log (recipe_id, cooked_on,"
+				  " comment) VALUES (1, '2026-01-01', '')"))
+	command.upgrade(alembic_config(), "head")
+	with engine.connect() as conn:
+		color = conn.execute(text("SELECT color FROM users")).scalar()
+		notes = conn.execute(text("SELECT user_id FROM notes")).all()
+		log = conn.execute(text("SELECT user_id FROM cook_log")).all()
+	engine.dispose()
+	assert color == "sea"
+	assert notes == [(1,)] and log == [(1,)]

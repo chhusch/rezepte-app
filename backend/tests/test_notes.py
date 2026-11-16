@@ -3,10 +3,12 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy import select
 
-from app.models import Note
+from app.models import Note, User
 from app.schemas import NOTE_MAX, NoteIn
 from app.services import notes as service
+from tests.conftest import TEST_USER
 from tests.test_recipes import post_recipe
 
 
@@ -20,7 +22,8 @@ def test_create_note(auth_client):
 	resp = post_note(auth_client, recipe["id"], "  Weniger Salz.  ")
 	assert resp.status_code == 201, resp.text
 	body = resp.json()
-	assert set(body) == {"id", "created_at", "text"}
+	assert set(body) == {"id", "created_at", "text", "author"}
+	assert body["author"] == {"username": TEST_USER, "color": "sea"}
 	assert body["id"] > 0
 	assert body["text"] == "Weniger Salz."
 	assert body["created_at"]
@@ -97,8 +100,10 @@ def test_recipe_lists_notes_newest_first(auth_client, db):
 
 def test_service_add_and_delete(db, auth_client):
 	recipe = post_recipe(auth_client)
-	assert service.add_note(db, 9999, NoteIn(text="x")) is None
-	note = service.add_note(db, recipe["id"], NoteIn(text=" x "))
+	user = db.scalars(select(User)).one()
+	assert service.add_note(db, 9999, NoteIn(text="x"), user) is None
+	note = service.add_note(db, recipe["id"], NoteIn(text=" x "), user)
+	assert note.user_id == user.id
 	assert note.id > 0 and note.text == "x"
 	assert note.created_at is not None
 	assert service.delete_note(db, recipe["id"] + 1, note.id) is False

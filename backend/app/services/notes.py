@@ -2,14 +2,15 @@
 
 from sqlalchemy.orm import Session
 
-from app.models import Note, Recipe
+from app.models import Note, Recipe, User
 from app.schemas import NoteIn
 
 
-def add_note(db: Session, recipe_id: int, data: NoteIn) -> Note | None:
+def add_note(db: Session, recipe_id: int, data: NoteIn,
+	     user: User) -> Note | None:
 	if db.get(Recipe, recipe_id) is None:
 		return None
-	note = Note(recipe_id=recipe_id, text=data.text)
+	note = Note(recipe_id=recipe_id, text=data.text, user_id=user.id)
 	db.add(note)
 	db.commit()
 	db.refresh(note)

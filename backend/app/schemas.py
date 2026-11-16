@@ -219,6 +219,13 @@ RATING_MIN = 1
 RATING_MAX = 5
 
 
+class AuthorOut(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
+	username: str
+	color: str
+
+
 class NoteIn(BaseModel):
 	text: str = Field(min_length=1, max_length=NOTE_MAX)
 
@@ -234,6 +241,7 @@ class NoteOut(BaseModel):
 	id: int
 	created_at: datetime
 	text: str
+	author: AuthorOut | None
 
 
 class CookLogIn(BaseModel):
@@ -256,6 +264,7 @@ class CookLogOut(BaseModel):
 	cooked_on: date
 	rating: int | None
 	comment: str
+	author: AuthorOut | None
 
 
 class FavoriteIn(BaseModel):
@@ -528,3 +537,27 @@ class FreezerItemOut(BaseModel):
 	def ser_amount(self, value):
 		return amount_to_str(value)
 
+
+
+class UserOut(BaseModel):
+	id: int
+	username: str
+	color: str
+	me: bool
+
+
+class ColorIn(BaseModel):
+	color: str
+
+
+class InviteOut(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
+	id: int
+	created_at: datetime
+	expires_at: datetime
+
+
+class InviteCreated(InviteOut):
+	"""The raw token is shown once, at creation."""
+	token: str

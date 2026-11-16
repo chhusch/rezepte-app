@@ -27,8 +27,8 @@ LOAD_ALL = (
 	selectinload(Recipe.tags),
 	selectinload(Recipe.versions).selectinload(RecipeVersion.ingredients),
 	selectinload(Recipe.versions).selectinload(RecipeVersion.steps),
-	selectinload(Recipe.notes),
-	selectinload(Recipe.cook_log),
+	selectinload(Recipe.notes).selectinload(Note.author),
+	selectinload(Recipe.cook_log).selectinload(CookLog.author),
 	selectinload(Recipe.photos),
 )
 

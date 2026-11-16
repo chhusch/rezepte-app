@@ -16,8 +16,8 @@ RECIPE_OUT_KEYS = {"id", "category", "tags", "favorite", "source",
 		   "created_at", "updated_at"}
 LIST_ITEM_KEYS = {"id", "title", "category", "tags", "favorite",
 		  "thumb_url", "cooked_count", "last_cooked", "updated_at"}
-NOTE_KEYS = {"id", "created_at", "text"}
-COOK_LOG_KEYS = {"id", "cooked_on", "rating", "comment"}
+NOTE_KEYS = {"id", "created_at", "text", "author"}
+COOK_LOG_KEYS = {"id", "cooked_on", "rating", "comment", "author"}
 PHOTO_KEYS = {"id", "url", "thumb_url", "is_own_result", "created_at"}
 VERSION_KEYS = {"title", "intro", "servings", "prep_minutes", "nutrition",
 		"cook_minutes", "ingredients", "steps"}

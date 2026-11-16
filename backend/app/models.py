@@ -60,6 +60,7 @@ class User(Base):
 	id: Mapped[int] = mapped_column(primary_key=True)
 	username: Mapped[str] = mapped_column(String(NAME_LEN), unique=True)
 	password_hash: Mapped[str] = mapped_column(Text)
+	color: Mapped[str] = mapped_column(String(COLOR_LEN))
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True), server_default=func.now())
 
@@ -79,6 +80,18 @@ class Session(Base):
 	expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 	user: Mapped["User"] = relationship(back_populates="sessions")
+
+
+class Invite(Base):
+	__tablename__ = "invites"
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	token_hash: Mapped[str] = mapped_column(String(128), unique=True)
+	created_by: Mapped[int | None] = mapped_column(
+		ForeignKey("users.id", ondelete="SET NULL"))
+	created_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True), server_default=func.now())
+	expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class LoginFailure(Base):
@@ -234,8 +247,11 @@ class Note(Base):
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True), server_default=func.now())
 	text: Mapped[str] = mapped_column(Text)
+	user_id: Mapped[int | None] = mapped_column(
+		ForeignKey("users.id", ondelete="SET NULL"))
 
 	recipe: Mapped["Recipe"] = relationship(back_populates="notes")
+	author: Mapped["User | None"] = relationship()
 
 
 class CookLog(Base):
@@ -247,8 +263,11 @@ class CookLog(Base):
 	cooked_on: Mapped[date] = mapped_column(Date)
 	rating: Mapped[int | None] = mapped_column(Integer)
 	comment: Mapped[str] = mapped_column(Text, default="")
+	user_id: Mapped[int | None] = mapped_column(
+		ForeignKey("users.id", ondelete="SET NULL"))
 
 	recipe: Mapped["Recipe"] = relationship(back_populates="cook_log")
+	author: Mapped["User | None"] = relationship()
 
 
 class Photo(Base):

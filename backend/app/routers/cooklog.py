@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.deps import current_user
+from app.models import User
 from app.schemas import CookLogIn, CookLogOut
 from app.services import cooklog as service
 
@@ -17,8 +18,9 @@ router = APIRouter(prefix="/recipes", dependencies=[Depends(current_user)])
 @router.post("/{recipe_id}/cooklog", response_model=CookLogOut,
 	     status_code=201)
 def add_entry(recipe_id: int, data: CookLogIn,
+	      user: User = Depends(current_user),
 	      db: Session = Depends(get_db)):
-	entry = service.add_entry(db, recipe_id, data)
+	entry = service.add_entry(db, recipe_id, data, user)
 	if entry is None:
 		raise HTTPException(status_code=404, detail=RECIPE_NOT_FOUND)
 	return CookLogOut.model_validate(entry)

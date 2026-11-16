@@ -2,16 +2,17 @@
 
 from sqlalchemy.orm import Session
 
-from app.models import CookLog, Recipe
+from app.models import CookLog, Recipe, User
 from app.schemas import CookLogIn
 
 
-def add_entry(db: Session, recipe_id: int,
-	      data: CookLogIn) -> CookLog | None:
+def add_entry(db: Session, recipe_id: int, data: CookLogIn,
+	      user: User) -> CookLog | None:
 	if db.get(Recipe, recipe_id) is None:
 		return None
 	entry = CookLog(recipe_id=recipe_id, cooked_on=data.cooked_on,
-			rating=data.rating, comment=data.comment)
+			rating=data.rating, comment=data.comment,
+			user_id=user.id)
 	db.add(entry)
 	db.commit()
 	db.refresh(entry)

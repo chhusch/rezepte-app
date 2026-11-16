@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.deps import current_user
+from app.models import User
 from app.schemas import NoteIn, NoteOut
 from app.services import notes as service
 
@@ -15,8 +16,10 @@ router = APIRouter(prefix="/recipes", dependencies=[Depends(current_user)])
 
 
 @router.post("/{recipe_id}/notes", response_model=NoteOut, status_code=201)
-def add_note(recipe_id: int, data: NoteIn, db: Session = Depends(get_db)):
-	note = service.add_note(db, recipe_id, data)
+def add_note(recipe_id: int, data: NoteIn,
+	     user: User = Depends(current_user),
+	     db: Session = Depends(get_db)):
+	note = service.add_note(db, recipe_id, data, user)
 	if note is None:
 		raise HTTPException(status_code=404, detail=RECIPE_NOT_FOUND)
 	return NoteOut.model_validate(note)

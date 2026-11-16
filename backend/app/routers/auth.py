@@ -11,6 +11,7 @@ from app.deps import client_ip, current_user, is_home_network
 from app.models import User
 from app.services import auth as auth_service
 from app.services import throttle
+from app.services import users as users_service
 
 SECONDS_PER_DAY = 86400
 WRONG_CREDENTIALS = "Benutzername oder Passwort falsch"
@@ -18,6 +19,7 @@ SETUP_DONE = "setup already done"
 SETUP_FROM_HOME = "Ersteinrichtung nur aus dem Heimnetz"
 TOO_MANY = "Zu viele Fehlversuche, später wieder versuchen"
 WRONG_CURRENT = "Aktuelles Passwort falsch"
+INVITE_INVALID = "Einladung ungültig oder abgelaufen"
 MAX_NAME_LEN = 200
 
 router = APIRouter(prefix="/auth")
@@ -28,7 +30,7 @@ class LoginInput(BaseModel):
 	password: str
 
 
-class SetupInput(BaseModel):
+class AccountInput(BaseModel):
 	username: str = Field(min_length=1, max_length=MAX_NAME_LEN)
 	password: str = Field(min_length=MIN_PASSWORD_LEN)
 
@@ -70,7 +72,7 @@ def setup_state(db: Session = Depends(get_db)):
 
 
 @router.post("/setup", status_code=201)
-def setup(body: SetupInput, request: Request, resp: Response,
+def setup(body: AccountInput, request: Request, resp: Response,
 	  db: Session = Depends(get_db)):
 	"""Create the single user on first use and log in. Only from the
 	home network, so nobody else can claim an empty database."""
@@ -79,6 +81,37 @@ def setup(body: SetupInput, request: Request, resp: Response,
 	if not is_home_network(client_ip(request)):
 		raise HTTPException(status_code=403, detail=SETUP_FROM_HOME)
 	auth_service.create_user(db, body.username, body.password)
+	token = auth_service.login(db, body.username, body.password)
+	_set_cookie(resp, token)
+	return {"username": body.username}
+
+
+def _valid_invite(db: Session, ip: str, token: str):
+	"""Unknown tokens count as failures, so links cannot be guessed."""
+	_check_throttle(db, ip)
+	inv = users_service.find_invite(db, token)
+	if inv is None:
+		throttle.record_failure(db, ip, "invite")
+		raise HTTPException(status_code=404, detail=INVITE_INVALID)
+	return inv
+
+
+@router.get("/invite/{token}")
+def invite_state(token: str, request: Request,
+		 db: Session = Depends(get_db)):
+	inv = _valid_invite(db, client_ip(request), token)
+	return {"expires_at": inv.expires_at}
+
+
+@router.post("/invite/{token}", status_code=201)
+def accept_invite(token: str, body: AccountInput, request: Request,
+		  resp: Response, db: Session = Depends(get_db)):
+	inv = _valid_invite(db, client_ip(request), token)
+	try:
+		users_service.accept_invite(db, inv, body.username,
+					    body.password)
+	except users_service.UserError as e:
+		raise HTTPException(status_code=409, detail=e.detail)
 	token = auth_service.login(db, body.username, body.password)
 	_set_cookie(resp, token)
 	return {"username": body.username}
