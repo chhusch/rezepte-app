@@ -59,4 +59,4 @@ bleiben PascalCase. Python wird mit Tabs eingerückt.
 - Bei Unklarheit oder zwei guten Lösungen kurz nachfragen statt raten.
   Entscheidungen, die einen späteren Wechsel von Hosting oder
   Oberfläche erschweren, immer ansprechen.
-- Branch: `claude/admiring-archimedes-96h6mx`.
+- Branch: `claude/website-server-vpn-networking-x2hcjb`.

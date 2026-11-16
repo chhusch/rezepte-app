@@ -67,7 +67,7 @@ Passwort festlegen; das ist der einzige Benutzer.
 Eigener Proxmox-Container `zugang` mit WireGuard (wg-easy), NPM und
 ddclient. Von aussen offen ist nur UDP 51820; ohne WireGuard-Schlüssel
 antwortet er nicht. Die App ist nur im Heimnetz und im Tunnel
-erreichbar.
+erreichbar; öffentlich siehe «Öffentlich erreichbar».
 
 Beispielwerte unten: Domain `deinedomain.ch`, `zugang` auf
 `192.168.0.210`, App-Container auf `192.168.0.211`. Eigene Werte
@@ -243,9 +243,52 @@ docker compose up -d api
 Startet `api` neu. Anmeldung danach nur noch über HTTPS:
 `https://rezepte.deinedomain.ch`.
 
+## Öffentlich erreichbar
+
+Statt nur im Tunnel ist die App dann für jeden Browser erreichbar.
+Voraussetzung: «Zugriff von unterwegs» eingerichtet, Passwort mit
+mindestens 12 Zeichen (sonst unter «Konto» ändern).
+
+1. In `.env` der App `TRUSTED_PROXY=192.168.0.210/32`, dann:
+
+   ```bash
+   git pull && docker compose up -d --build
+   ```
+
+   Holt die neue Version, baut sie und startet sie neu.
+2. Prüfen, ob die App echte Adressen sieht: im Heimnetz einmal mit
+   falschem Passwort über `https://rezepte.deinedomain.ch` anmelden.
+
+   ```bash
+   docker compose logs api | grep "auth failure"
+   ```
+
+   Zeigt die Fehlversuche. Die Adresse muss die des Handys sein. Steht
+   dort `172.…`, `TRUSTED_PROXY` wieder auskommentieren und
+   `docker compose up -d web` (startet nur Caddy neu). Steht dort
+   `192.168.0.210`, stimmt `TRUSTED_PROXY` nicht.
+3. Infomaniak, DNS-Zone: A-Eintrag `rezepte` löschen, CNAME `rezepte`
+   → `vpn.deinedomain.ch` anlegen. Folgt so der öffentlichen IP.
+4. myWingo, Port-Forwarding: TCP 443 → `192.168.0.210`. Nicht 80, 81
+   oder 51821.
+5. NPM, Proxy Host bearbeiten: «Details» «Block Common Exploits»;
+   «SSL» «Force SSL», «HSTS Enabled», «HTTP/2 Support».
+6. Testen: Handy im Mobilfunk ohne Tunnel, dann im Heim-WLAN.
+
+Geht es im Heim-WLAN nicht, leitet die Box Anfragen an die eigene
+öffentliche IP nicht zurück ins Heimnetz (NAT-Loopback).
+
+Zurück zum Tunnel: Weiterleitung 443 löschen, CNAME durch A `rezepte`
+→ `192.168.0.210` ersetzen.
+
 ## Benutzer
 
-Angelegt beim ersten Öffnen im Browser. Passwort vergessen:
+Angelegt beim ersten Öffnen im Browser, nur aus dem Heimnetz.
+Menü, «Konto»: Passwort ändern, alle Geräte abmelden.
+
+Nach 5 Fehlversuchen innert 15 Minuten ist die Anmeldung von dieser
+Adresse gesperrt, bis der älteste 15 Minuten zurückliegt. Passwort
+vergessen:
 
 ```bash
 docker compose exec api python -m app.cli set-password NAME
@@ -431,6 +474,8 @@ cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
   auch zu Hause einschalten.
 - Container `restarting`/`exited`: `docker compose logs NAME`.
 - Passwort vergessen: `set-password`.
+- «Zu viele Fehlversuche»: 15 Minuten warten. Fremde Versuche:
+  `docker compose logs api | grep "auth failure"`.
 - DB-Passwort ändern: zuerst in der DB,
   `docker compose exec db psql -U rezepte -c "ALTER USER rezepte PASSWORD 'NEU';"`,
   dann `.env`, dann `docker compose up -d`.

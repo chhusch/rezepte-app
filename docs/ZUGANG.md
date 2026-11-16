@@ -57,6 +57,7 @@ Passwort-Manager.
 - [ ] App unter `http://192.168.0.211:8080` erreichbar (nach Wechsel)
 - [ ] In NPM fehlgeschlagene Zertifikatseinträge löschen
 - [ ] Alten Infomaniak-Token (nur «domain») löschen
+- [ ] Öffentlich schalten: README, «Öffentlich erreichbar»
 - [ ] Proxmox-Host `192.168.0.41` liegt im DHCP-Bereich
       (`.10`–`.200`); später ausserhalb legen
 

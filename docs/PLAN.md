@@ -398,3 +398,22 @@ Speichern läuft über das bestehende `POST /api/recipes` mit
 - Menüplan-Zutaten: `freezer` markiert und abgewählt, wenn alle Wörter
   eines Namens im anderen vorkommen.
 - Export Version 2: `recipes.json` zusätzlich mit `plan` und `freezer`.
+
+## Phase C 16.11.: Absicherung für öffentlichen Zugang
+- Tabelle `login_failures` (Migration 0005): IP, Zeitpunkt.
+  `services/throttle.py`: 5 Fehlversuche in 15 Min. sperren die IP
+  (`429`, `Retry-After`), Erfolg löscht ihre Einträge. Fehlversuche
+  ins Log (`auth failure: … from IP`).
+- Echte IP: Caddy `trusted_proxies` (`TRUSTED_PROXY`, Standard
+  `private_ranges`), strikt von rechts, setzt `X-Forwarded-For` auf
+  `{client_ip}`; uvicorn `--proxy-headers`.
+- Unbekannter Benutzer: gleich teure Hash-Prüfung wie ein bekannter.
+- Passwort mind. 12 Zeichen (Setup, Änderung, CLI).
+- Ersteinrichtung nur von privaten Adressen (`403` sonst).
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| POST | /api/auth/password | `{current, new}`; beendet alle Sitzungen, neue für dieses Gerät |
+| POST | /api/auth/logout-all | alle Sitzungen beenden |
+
+- `#/konto` (`account.js`): Passwort ändern, überall abmelden.
