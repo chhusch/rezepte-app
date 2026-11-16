@@ -25,6 +25,7 @@ from app.services import auth as auth_service
 
 TEST_USER = "test"
 TEST_PASSWORD = "secret"
+HOME_ADDR = ("192.168.0.20", 50000)
 
 
 def _sqlite_fk(conn, record):
@@ -54,7 +55,7 @@ def client(db):
 		yield db
 
 	app.dependency_overrides[get_db] = override_db
-	with TestClient(app) as c:
+	with TestClient(app, client=HOME_ADDR) as c:
 		yield c
 	app.dependency_overrides.clear()
 

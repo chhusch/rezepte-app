@@ -32,7 +32,7 @@ def test_login_wrong_password(client, db):
 	r = client.post(LOGIN, json={"username": TEST_USER,
 				     "password": "nope"})
 	assert r.status_code == 401
-	assert r.json() == {"detail": "wrong credentials"}
+	assert r.json() == {"detail": "Benutzername oder Passwort falsch"}
 	assert auth.COOKIE_NAME not in r.cookies
 
 

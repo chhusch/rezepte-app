@@ -29,6 +29,7 @@ UNIT_LEN = 50
 FILENAME_LEN = 255
 TOKEN_LEN = 64
 COLOR_LEN = 20
+IP_LEN = 45
 
 
 class Base(DeclarativeBase):
@@ -78,6 +79,14 @@ class Session(Base):
 	expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 	user: Mapped["User"] = relationship(back_populates="sessions")
+
+
+class LoginFailure(Base):
+	__tablename__ = "login_failures"
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	ip: Mapped[str] = mapped_column(String(IP_LEN), index=True)
+	at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class Category(Base):

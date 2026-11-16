@@ -1,20 +1,23 @@
-"""Login, logout and whoami. Mounted under /api by main.py."""
+"""Login, logout, password and whoami. Mounted under /api by main.py."""
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
-from app.auth import COOKIE_NAME
+from app.auth import COOKIE_NAME, MIN_PASSWORD_LEN
 from app.config import settings
 from app.db import get_db
-from app.deps import current_user
+from app.deps import client_ip, current_user, is_home_network
 from app.models import User
 from app.services import auth as auth_service
+from app.services import throttle
 
 SECONDS_PER_DAY = 86400
-WRONG_CREDENTIALS = "wrong credentials"
+WRONG_CREDENTIALS = "Benutzername oder Passwort falsch"
 SETUP_DONE = "setup already done"
-MIN_PASSWORD_LEN = 8
+SETUP_FROM_HOME = "Ersteinrichtung nur aus dem Heimnetz"
+TOO_MANY = "Zu viele Fehlversuche, später wieder versuchen"
+WRONG_CURRENT = "Aktuelles Passwort falsch"
 MAX_NAME_LEN = 200
 
 router = APIRouter(prefix="/auth")
@@ -35,6 +38,11 @@ class SetupInput(BaseModel):
 		return value.strip() if isinstance(value, str) else value
 
 
+class PasswordInput(BaseModel):
+	current: str
+	new: str = Field(min_length=MIN_PASSWORD_LEN)
+
+
 def _set_cookie(resp: Response, token: str) -> None:
 	resp.set_cookie(COOKIE_NAME, token, httponly=True,
 			secure=settings.cookie_secure, samesite="lax",
@@ -47,6 +55,13 @@ def _clear_cookie(resp: Response) -> None:
 			   secure=settings.cookie_secure, samesite="lax")
 
 
+def _check_throttle(db: Session, ip: str) -> None:
+	wait = throttle.retry_after(db, ip)
+	if wait:
+		raise HTTPException(status_code=429, detail=TOO_MANY,
+				    headers={"Retry-After": str(wait)})
+
+
 @router.get("/setup")
 def setup_state(db: Session = Depends(get_db)):
 	"""Public: tells the login screen whether the first user is
@@ -55,11 +70,14 @@ def setup_state(db: Session = Depends(get_db)):
 
 
 @router.post("/setup", status_code=201)
-def setup(body: SetupInput, resp: Response,
+def setup(body: SetupInput, request: Request, resp: Response,
 	  db: Session = Depends(get_db)):
-	"""Create the single user on first use and log in."""
+	"""Create the single user on first use and log in. Only from the
+	home network, so nobody else can claim an empty database."""
 	if auth_service.has_users(db):
 		raise HTTPException(status_code=409, detail=SETUP_DONE)
+	if not is_home_network(client_ip(request)):
+		raise HTTPException(status_code=403, detail=SETUP_FROM_HOME)
 	auth_service.create_user(db, body.username, body.password)
 	token = auth_service.login(db, body.username, body.password)
 	_set_cookie(resp, token)
@@ -67,13 +85,34 @@ def setup(body: SetupInput, resp: Response,
 
 
 @router.post("/login")
-def login(body: LoginInput, resp: Response,
+def login(body: LoginInput, request: Request, resp: Response,
 	  db: Session = Depends(get_db)):
+	ip = client_ip(request)
+	_check_throttle(db, ip)
 	token = auth_service.login(db, body.username, body.password)
 	if token is None:
+		throttle.record_failure(db, ip, "login %r" % body.username)
 		raise HTTPException(status_code=401, detail=WRONG_CREDENTIALS)
+	throttle.clear(db, ip)
 	_set_cookie(resp, token)
 	return {"username": body.username}
+
+
+@router.post("/password")
+def change_password(body: PasswordInput, request: Request,
+		    resp: Response, user: User = Depends(current_user),
+		    db: Session = Depends(get_db)):
+	"""Ends every session, including other devices; this one gets a
+	new cookie."""
+	ip = client_ip(request)
+	_check_throttle(db, ip)
+	token = auth_service.change_password(db, user, body.current,
+					     body.new)
+	if token is None:
+		throttle.record_failure(db, ip, "password change")
+		raise HTTPException(status_code=403, detail=WRONG_CURRENT)
+	_set_cookie(resp, token)
+	return {"ok": True}
 
 
 @router.post("/logout")
@@ -82,6 +121,14 @@ def logout(request: Request, resp: Response,
 	token = request.cookies.get(COOKIE_NAME)
 	if token:
 		auth_service.logout(db, token)
+	_clear_cookie(resp)
+	return {"ok": True}
+
+
+@router.post("/logout-all")
+def logout_all(resp: Response, user: User = Depends(current_user),
+	       db: Session = Depends(get_db)):
+	auth_service.logout_all(db, user)
 	_clear_cookie(resp)
 	return {"ok": True}
 

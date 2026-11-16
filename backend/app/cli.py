@@ -5,24 +5,27 @@ import getpass
 import os
 import sys
 
+from app.auth import MIN_PASSWORD_LEN
 from app.db import SessionLocal
 from app.services import auth as auth_service
 from app.services import todo as todo_service
 
 PASSWORD_ENV = "REZEPTE_PASSWORD"
-MIN_PASSWORD_LEN = 1
 
 
-def read_password() -> str:
-	pw = os.environ.get(PASSWORD_ENV)
-	if pw:
-		return pw
+def prompt_password() -> str:
 	pw = getpass.getpass("Passwort: ")
 	again = getpass.getpass("Passwort wiederholen: ")
 	if pw != again:
 		sys.exit("Fehler: Die Passwoerter stimmen nicht ueberein.")
+	return pw
+
+
+def read_password() -> str:
+	pw = os.environ.get(PASSWORD_ENV) or prompt_password()
 	if len(pw) < MIN_PASSWORD_LEN:
-		sys.exit("Fehler: Das Passwort darf nicht leer sein.")
+		sys.exit("Fehler: Das Passwort braucht mindestens %d Zeichen."
+			 % MIN_PASSWORD_LEN)
 	return pw
 
 

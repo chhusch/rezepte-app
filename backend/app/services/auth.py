@@ -36,18 +36,39 @@ def set_password(db: DbSession, username: str, password: str) -> None:
 	db.commit()
 
 
-def login(db: DbSession, username: str, password: str) -> str | None:
-	"""Return a raw session token, or None on wrong credentials."""
-	user = get_user(db, username)
-	if user is None:
-		return None
-	if not auth.verify_password(user.password_hash, password):
-		return None
+def _new_session(db: DbSession, user: User) -> str:
 	token = auth.new_token()
 	db.add(Session(user_id=user.id, token_hash=auth.hash_token(token),
 		       expires_at=auth.session_expiry()))
 	db.commit()
 	return token
+
+
+def login(db: DbSession, username: str, password: str) -> str | None:
+	"""Return a raw session token, or None on wrong credentials."""
+	user = get_user(db, username)
+	if user is None:
+		auth.waste_verify(password)
+		return None
+	if not auth.verify_password(user.password_hash, password):
+		return None
+	return _new_session(db, user)
+
+
+def change_password(db: DbSession, user: User, current: str,
+		    new: str) -> str | None:
+	"""Set a new password and end all sessions of the user. Return a
+	fresh session token, or None if current is wrong."""
+	if not auth.verify_password(user.password_hash, current):
+		return None
+	user.password_hash = auth.hash_password(new)
+	logout_all(db, user)
+	return _new_session(db, user)
+
+
+def logout_all(db: DbSession, user: User) -> None:
+	db.execute(delete(Session).where(Session.user_id == user.id))
+	db.commit()
 
 
 def _find_session(db: DbSession, token: str) -> Session | None:
@@ -62,19 +83,12 @@ def logout(db: DbSession, token: str) -> None:
 		db.commit()
 
 
-def _as_utc(dt):
-	# SQLite returns naive datetimes; treat them as UTC.
-	if dt.tzinfo is None:
-		return dt.replace(tzinfo=auth.now_utc().tzinfo)
-	return dt
-
-
 def user_for_token(db: DbSession, token: str) -> User | None:
 	"""Return the user of a valid, unexpired session, else None."""
 	sess = _find_session(db, token)
 	if sess is None:
 		return None
-	if _as_utc(sess.expires_at) <= auth.now_utc():
+	if auth.as_utc(sess.expires_at) <= auth.now_utc():
 		return None
 	return db.get(User, sess.user_id)
 

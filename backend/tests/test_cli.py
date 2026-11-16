@@ -11,7 +11,8 @@ from app.models import Base, Session, User
 from app.services import auth as auth_service
 
 USER = "anna"
-PASSWORD = "geheim"
+PASSWORD = "geheim-und-lang"
+NEW_PASSWORD = "neu-und-auch-lang"
 
 
 def _sqlite_fk(conn, record):
@@ -56,10 +57,10 @@ def test_create_user_command_is_gone(cli_db):
 
 def test_set_password_changes_password(cli_db, monkeypatch):
 	seed_user(cli_db)
-	monkeypatch.setenv(cli.PASSWORD_ENV, "neu")
+	monkeypatch.setenv(cli.PASSWORD_ENV, NEW_PASSWORD)
 	run(["set-password", USER])
 	assert auth_service.login(cli_db, USER, PASSWORD) is None
-	assert auth_service.login(cli_db, USER, "neu") is not None
+	assert auth_service.login(cli_db, USER, NEW_PASSWORD) is not None
 
 
 def test_set_password_unknown_user_exits_nonzero(cli_db):
@@ -110,6 +111,15 @@ def test_password_prompt_mismatch_exits(cli_db, monkeypatch):
 	with pytest.raises(SystemExit) as exc:
 		run(["set-password", USER])
 	assert "stimmen nicht" in str(exc.value.code)
+	assert auth_service.login(cli_db, USER, PASSWORD) is not None
+
+
+def test_set_password_rejects_short_password(cli_db, monkeypatch):
+	monkeypatch.setenv(cli.PASSWORD_ENV, "kurz")
+	seed_user(cli_db)
+	with pytest.raises(SystemExit) as exc:
+		run(["set-password", USER])
+	assert "mindestens 12" in str(exc.value.code)
 	assert auth_service.login(cli_db, USER, PASSWORD) is not None
 
 

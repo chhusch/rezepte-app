@@ -1,5 +1,7 @@
 """FastAPI dependencies shared by routers."""
 
+import ipaddress
+
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -20,3 +22,16 @@ def current_user(request: Request,
 	if user is None:
 		raise HTTPException(status_code=401, detail=NOT_LOGGED_IN)
 	return user
+
+
+def client_ip(request: Request) -> str:
+	"""Visitor address; uvicorn takes it from the header Caddy sets."""
+	return request.client.host if request.client else ""
+
+
+def is_home_network(ip: str) -> bool:
+	try:
+		addr = ipaddress.ip_address(ip)
+	except ValueError:
+		return False
+	return addr.is_private or addr.is_loopback
